@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter+Tight:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600&family=Noto+Sans+Telugu:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600&family=Noto+Sans+Malayalam:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
 :root{
   --ivory:#faf6ef;--cream:#f1ead9;--parchment:#e8dfc8;
@@ -876,14 +878,52 @@ function freshDB(){
     settings:{org:'L&D',sender:'L&D Team',expiryHours:24,adminHash:hashPw('disc-admin'),seeded:false}
   };
 }
-let DB = loadDB();
-ensureSeed();
+let DB = freshDB();
+
+/* ---------- FIREBASE CONFIGURATION ---------- */
+// TODO: Replace this with your actual Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCCN0QGqblqLz17esOtrgsFaqw3LgLfJzY",
+  authDomain: "disc-grt.firebaseapp.com",
+  databaseURL: "https://disc-grt-default-rtdb.firebaseio.com",
+  projectId: "disc-grt",
+  storageBucket: "disc-grt.firebasestorage.app",
+  messagingSenderId: "21361692470",
+  appId: "1:21361692470:web:3252786268ec0fda61ad97",
+  measurementId: "G-G9R1PRZ486"
+};
+
+let firebaseApp;
+let database;
+try {
+  if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+    firebaseApp = firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+  }
+} catch(e) { console.error("Firebase init error", e); }
  
-function loadDB(){
+async function loadDB(){
+  if (database) {
+    try {
+      const snapshot = await database.ref(STORE_KEY).once('value');
+      if (snapshot.exists()) {
+        const d = snapshot.val();
+        if(!d.registry)d.registry=[];
+        if(!d.settings)d.settings=freshDB().settings;
+        return d;
+      }
+    } catch(e) { console.error(e); }
+  }
+
   try{const raw=localStorage.getItem(STORE_KEY);if(raw){const d=JSON.parse(raw);if(!d.registry)d.registry=[];if(!d.settings)d.settings=freshDB().settings;return d;}}catch(e){}
   return freshDB();
 }
-function saveDB(){try{localStorage.setItem(STORE_KEY,JSON.stringify(DB))}catch(e){toast('Storage error.')}}
+function saveDB(){
+  if (database) {
+    database.ref(STORE_KEY).set(DB).catch(e => toast('Firebase sync error.'));
+  }
+  try{localStorage.setItem(STORE_KEY,JSON.stringify(DB))}catch(e){toast('Storage error.')}
+}
 function hashPw(s){let h=5381;for(let i=0;i<s.length;i++){h=((h<<5)+h)+s.charCodeAt(i);h|=0}return 'h_'+(h>>>0).toString(16)}
  
 function ensureSeed(){
@@ -1708,7 +1748,12 @@ function buildLangPills(){
 buildLangPills();
  
 /* ---------- Boot ---------- */
-showLogin();
+async function bootApp() {
+  DB = await loadDB();
+  ensureSeed();
+  showLogin();
+}
+bootApp();
 </script>
 </body>
 </html>
