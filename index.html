@@ -984,8 +984,8 @@ function switchLoginTab(w){
   document.getElementById('loginAdmin').classList.toggle('active',w==='admin');
 }
  
-function staffLogin(){
-  DB=loadDB();
+async function staffLogin(){
+  DB=await loadDB();
   const mRaw=(document.getElementById('staffMobile').value||'').trim();
   const oRaw=(document.getElementById('staffOtp').value||'').trim();
   const mobile=mRaw.replace(/\D/g,'').slice(-10);
@@ -1004,8 +1004,8 @@ function staffLogin(){
   showApp(); configureForRole(); switchTab('assess');
   toast('Welcome, '+rec.name);
 }
-function adminLogin(){
-  DB=loadDB();
+async function adminLogin(){
+  DB=await loadDB();
   const pw=document.getElementById('adminPass').value;
   if(hashPw(pw)!==DB.settings.adminHash){toast('Incorrect password.');return}
   session={role:'admin',name:'Admin'};
