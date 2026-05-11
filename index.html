@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DISC Profiler — L&D Job Analysis Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter+Tight:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600&family=Noto+Sans+Telugu:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600&family=Noto+Sans+Malayalam:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --ivory:#faf6ef;--cream:#f1ead9;--parchment:#e8dfc8;
+  --ink:#1f1a14;--ink-soft:#3a3228;--muted:#7a6b55;
+  --gold:#b8862d;--gold-deep:#8a6420;--gold-light:#d9b26a;--rule:#d7ccaf;
+  --dom:#c0392b;--inf:#e0a528;--ste:#2f7a4d;--con:#2a5a8f;
+  --graph-green:#a8d179;--graph-green-light:#d8ecb9;--graph-blue:#2b4b7a;
+  --shadow:0 1px 2px rgba(31,26,20,.04), 0 8px 24px rgba(31,26,20,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--ivory);color:var(--ink);font-family:'Inter Tight',sans-serif;font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;background-image:radial-gradient(circle at 15% 10%, rgba(184,134,45,.05), transparent 40%),radial-gradient(circle at 85% 90%, rgba(42,90,143,.04), transparent 40%);}
+body.lang-ta, body.lang-ta *{font-family:'Noto Sans Tamil','Inter Tight',sans-serif !important}
+body.lang-te, body.lang-te *{font-family:'Noto Sans Telugu','Inter Tight',sans-serif !important}
+body.lang-kn, body.lang-kn *{font-family:'Noto Sans Kannada','Inter Tight',sans-serif !important}
+body.lang-ml, body.lang-ml *{font-family:'Noto Sans Malayalam','Inter Tight',sans-serif !important}
+body.lang-hi, body.lang-hi *{font-family:'Noto Sans Devanagari','Inter Tight',sans-serif !important}
+body.lang-ta h1, body.lang-te h1, body.lang-kn h1, body.lang-ml h1, body.lang-hi h1,
+body.lang-ta h2, body.lang-te h2, body.lang-kn h2, body.lang-ml h2, body.lang-hi h2,
+body.lang-ta h3, body.lang-te h3, body.lang-kn h3, body.lang-ml h3, body.lang-hi h3{font-family:inherit !important}
+ 
+h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:500;letter-spacing:-.015em;color:var(--ink)}
+h1{font-size:2rem;font-weight:400}h2{font-size:1.45rem}h3{font-size:1.1rem;font-weight:600}h4{font-size:.95rem;font-weight:600}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
+ 
+.app{max-width:1280px;margin:0 auto;padding:28px 32px 80px}
+header.topbar{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--rule);padding-bottom:20px;margin-bottom:32px;gap:14px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;gap:4px}
+.brand .mono{font-family:'Inter Tight',sans-serif;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
+.brand h1 em{font-style:italic;color:var(--gold-deep);font-family:'Fraunces',serif}
+.topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.role-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;background:var(--ink);color:var(--ivory)}
+.role-badge.staff{background:var(--gold-deep)}
+ 
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.tab{padding:10px 16px;font-size:13px;letter-spacing:.02em;color:var(--muted);border-bottom:2px solid transparent;transition:.15s;font-weight:500}
+.tab:hover{color:var(--ink-soft)}
+.tab.active{color:var(--ink);border-bottom-color:var(--gold)}
+.panel{display:none}
+.panel.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+ 
+.card{background:#fffdf7;border:1px solid var(--rule);border-radius:10px;padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
+.card.tight{padding:16px}
+.card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.subtle{font-size:12.5px;color:var(--muted)}
+.rule{height:1px;background:var(--rule);margin:16px 0}
+ 
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:13px;font-weight:500;border:1px solid var(--rule);background:#fffdf7;transition:.15s}
+.btn:hover{background:var(--cream);border-color:var(--gold-light)}
+.btn.primary{background:var(--ink);color:var(--ivory);border-color:var(--ink)}
+.btn.primary:hover{background:var(--ink-soft)}
+.btn.gold{background:var(--gold);color:#fff;border-color:var(--gold)}
+.btn.gold:hover{background:var(--gold-deep);border-color:var(--gold-deep)}
+.btn.wa{background:#25d366;color:#fff;border-color:#25d366}
+.btn.wa:hover{background:#1ebe5b;border-color:#1ebe5b}
+.btn.danger{background:transparent;color:var(--dom);border-color:#e4b3ae}
+.btn.danger:hover{background:#fbeeec}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+ 
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.field label{display:block;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--rule);border-radius:6px;background:#fffdf7;transition:.15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,45,.12)}
+.field textarea{min-height:90px;resize:vertical;font-family:inherit}
+ 
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;background:var(--cream);color:var(--ink-soft);font-weight:600;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--rule)}
+td{padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:middle}
+tr:hover td{background:#fffaea}
+.table-wrap{overflow-x:auto;border:1px solid var(--rule);border-radius:8px}
+ 
+.disc-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-weight:700;font-size:12px;color:#fff}
+.disc-D{background:var(--dom)}.disc-I{background:var(--inf)}.disc-S{background:var(--ste)}.disc-C{background:var(--con)}
+.disc-pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em}
+.pill-D{background:#fdecea;color:var(--dom)}.pill-I{background:#fdf3db;color:var(--gold-deep)}.pill-S{background:#e6f1ea;color:var(--ste)}.pill-C{background:#e3ecf5;color:var(--con)}
+.tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:500;background:var(--cream);color:var(--ink-soft);margin:2px}
+ 
+.assessment-header{background:linear-gradient(135deg,#fffdf7 0%,var(--cream) 100%);border:1px solid var(--gold-light);border-radius:10px;padding:22px;margin-bottom:20px}
+.progress-bar{height:6px;background:var(--parchment);border-radius:3px;overflow:hidden;margin-top:14px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold) 0%, var(--gold-deep) 100%);transition:width .3s ease}
+.q-block{background:#fffdf7;border:1px solid var(--rule);border-radius:10px;padding:22px;margin-bottom:16px}
+.q-block h4{margin-bottom:14px;color:var(--ink-soft)}
+.q-instruction{font-size:12.5px;color:var(--muted);margin-bottom:16px;font-style:italic}
+.adj-group{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px dashed var(--rule)}
+.adj-group:last-child{border-bottom:none}
+.adj-word{font-size:14.5px;color:var(--ink-soft)}
+.adj-btn{padding:5px 12px;border-radius:5px;font-size:11px;font-weight:600;border:1px solid var(--rule);background:#fff;transition:.15s;min-width:56px;cursor:pointer}
+.adj-btn.most.selected{background:var(--gold-deep);color:#fff;border-color:var(--gold-deep)}
+.adj-btn.least.selected{background:var(--ink);color:#fff;border-color:var(--ink)}
+.adj-btn:hover{border-color:var(--gold)}
+ 
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:960px){.analysis-grid{grid-template-columns:1fr}}
+ 
+.drop-zone{border:2px dashed var(--rule);border-radius:10px;padding:28px;text-align:center;background:#fffdf7;transition:.15s;cursor:pointer}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--gold);background:var(--cream)}
+.drop-zone .icon{font-size:2rem;margin-bottom:8px;opacity:.6}
+.drop-zone .sub{font-size:12px;color:var(--muted);margin-top:4px}
+ 
+.critical-panel{background:linear-gradient(135deg,#fffdf7,#fbf4df);border:1px solid var(--gold-light);border-radius:10px;padding:20px;margin-top:16px}
+.critical-panel h3{color:var(--gold-deep);margin-bottom:10px}
+.insight-item{padding:10px 0;border-bottom:1px dashed var(--rule);display:flex;gap:10px;align-items:flex-start}
+.insight-item:last-child{border-bottom:none}
+.insight-icon{flex-shrink:0;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;margin-top:2px}
+ 
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:var(--ivory);padding:12px 18px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:1000;opacity:0;transform:translateY(20px);transition:.3s;pointer-events:none;max-width:320px}
+.toast.show{opacity:1;transform:translateY(0)}
+ 
+.modal-bg{position:fixed;inset:0;background:rgba(31,26,20,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:var(--ivory);border-radius:12px;padding:28px;max-width:960px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);position:relative}
+.modal h2{margin-bottom:14px}
+.modal .close{position:absolute;top:14px;right:18px;font-size:1.5rem;color:var(--muted);cursor:pointer}
+ 
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-style:italic}
+.empty-state .icon{font-size:2.5rem;margin-bottom:10px;opacity:.5}
+ 
+.flex-between{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.kbd{background:var(--cream);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:11px;border:1px solid var(--rule)}
+ 
+/* ======== LOGIN ======== */
+#loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background-image:radial-gradient(circle at 15% 10%, rgba(184,134,45,.1), transparent 40%),radial-gradient(circle at 85% 90%, rgba(42,90,143,.08), transparent 40%);}
+.login-card{max-width:460px;width:100%;background:#fffdf7;border:1px solid var(--rule);border-radius:14px;padding:36px 32px;box-shadow:0 24px 60px rgba(31,26,20,.12)}
+.login-logo{text-align:center;margin-bottom:22px}
+.login-logo .mono{font-family:'Inter Tight';font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
+.login-logo h1{font-family:'Fraunces',serif;font-size:1.85rem;margin-top:6px}
+.login-logo h1 em{color:var(--gold-deep);font-style:italic}
+.login-logo .tag-line{font-size:12.5px;color:var(--muted);margin-top:4px}
+.login-tabs{display:flex;border-radius:8px;border:1px solid var(--rule);overflow:hidden;margin-bottom:18px}
+.login-tabs button{flex:1;padding:11px;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;background:#fffdf7;color:var(--muted);transition:.15s;border-right:1px solid var(--rule)}
+.login-tabs button:last-child{border-right:none}
+.login-tabs button.active{background:var(--ink);color:var(--ivory)}
+.login-form{display:none}
+.login-form.active{display:block;animation:fade .25s}
+.otp-input{letter-spacing:.4em;font-family:'Fraunces',serif;font-size:1.4rem;text-align:center;font-weight:600}
+.phone-prefix{display:flex;align-items:stretch;border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:#fffdf7}
+.phone-prefix span{padding:9px 12px;background:var(--cream);color:var(--ink-soft);font-weight:600;border-right:1px solid var(--rule)}
+.phone-prefix input{border:none;flex:1;padding:9px 11px}
+.phone-prefix input:focus{outline:none}
+.lang-pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:18px}
+.lang-pill{padding:5px 11px;border-radius:999px;font-size:11px;border:1px solid var(--rule);background:#fffdf7;cursor:pointer;font-weight:500;color:var(--muted)}
+.lang-pill.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+ 
+.otp-display{background:linear-gradient(135deg,var(--cream),#fff8e1);border:1px solid var(--gold-light);border-radius:10px;padding:16px;text-align:center;margin-top:10px}
+.otp-display .lbl{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.otp-display .code{font-family:'Fraunces',serif;font-size:2.4rem;font-weight:500;letter-spacing:.3em;color:var(--gold-deep);margin:4px 0}
+.otp-display .expiry{font-size:11.5px;color:var(--muted)}
+ 
+.status-chip{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.status-pending{background:#fdf3db;color:var(--gold-deep)}
+.status-active{background:#e6f1ea;color:var(--ste)}
+.status-done{background:#e3ecf5;color:var(--con)}
+.status-expired{background:#fbeeec;color:var(--dom)}
+ 
+/* ======== THOMAS-STYLE GRAPHS ======== */
+.ppa-graph-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:12px}
+@media(max-width:800px){.ppa-graph-row{grid-template-columns:1fr}}
+.ppa-graph-single{display:grid;grid-template-columns:1fr;max-width:340px;margin:0 auto}
+.ppa-col{text-align:center}
+.ppa-col .ppa-num{font-family:'Fraunces',serif;font-weight:500;font-size:1.05rem;letter-spacing:.08em}
+.ppa-col .ppa-title{font-size:12.5px;color:var(--ink-soft);letter-spacing:.03em;margin-bottom:12px;font-weight:500;font-family:'Fraunces',serif;font-style:italic}
+.ppa-svg-box{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:8px}
+.ppa-svg-box svg{display:block;width:100%;height:auto}
+.ppa-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px;font-family:'Inter Tight',monospace;font-size:13px;font-weight:600;color:var(--graph-blue)}
+.ppa-scores span{text-align:center}
+.ppa-labels{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:4px;font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:.15em}
+.ppa-labels span{text-align:center}
+ 
+.job-profile-box{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:14px;max-width:380px}
+.job-profile-box h3{margin-bottom:10px}
+ 
+@media print{
+  header.topbar,.tabs,.btn,.btn-row,#modalBg,.toast,.login-tabs,.lang-pills{display:none !important}
+  .card{box-shadow:none;border:1px solid #999}
+  body{background:#fff}
+}
+</style>
+</head>
+<body class="lang-en">
+ 
+<!-- ============================= LOGIN ============================= -->
+<div id="loginView">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="mono">L&amp;D · Behavioural Science Suite</div>
+      <h1>DISC <em>Profiler</em></h1>
+      <div class="tag-line" id="loginTag">Sign in to continue</div>
+    </div>
+ 
+    <div class="lang-pills" id="langPills"></div>
+ 
+    <div class="login-tabs">
+      <button class="active" onclick="switchLoginTab('staff')" id="ltStaff">Staff · Assessment</button>
+      <button onclick="switchLoginTab('admin')" id="ltAdmin">Admin · L&amp;D</button>
+    </div>
+ 
+    <div class="login-form active" id="loginStaff">
+      <p class="subtle" style="margin-bottom:16px;text-align:center" id="staffLoginHelp">Enter your registered mobile number and the OTP shared by your L&amp;D team.</p>
+      <div class="field">
+        <label id="lblMobile">Mobile Number</label>
+        <div class="phone-prefix">
+          <span>+91</span>
+          <input id="staffMobile" type="tel" maxlength="10" inputmode="numeric" autocomplete="off" placeholder="10-digit number" oninput="this.value=this.value.replace(/\D/g,'')"/>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label id="lblOtp">OTP (6 digits)</label>
+        <input id="staffOtp" class="otp-input" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="······" oninput="this.value=this.value.replace(/\D/g,'')"/>
+      </div>
+      <div style="margin-top:18px">
+        <button class="btn gold" style="width:100%;justify-content:center;padding:11px" onclick="staffLogin()" id="btnEnterAssess">Enter Assessment →</button>
+      </div>
+      <p class="subtle" style="margin-top:14px;text-align:center;font-size:11.5px" id="noOtpHelp">Don't have an OTP? Contact your L&amp;D Manager.</p>
+    </div>
+ 
+    <div class="login-form" id="loginAdmin">
+      <p class="subtle" style="margin-bottom:16px;text-align:center">For L&amp;D HODs &amp; Managers only.</p>
+      <div class="field">
+        <label>Admin Password</label>
+        <input id="adminPass" type="password" placeholder="Enter admin password" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      </div>
+      <div style="margin-top:18px">
+        <button class="btn primary" style="width:100%;justify-content:center;padding:11px" onclick="adminLogin()">Sign in</button>
+      </div>
+      <p class="subtle" style="margin-top:14px;text-align:center;font-size:11.5px">Credentials are confidential to L&amp;D leadership.</p>
+    </div>
+  </div>
+</div>
+ 
+<!-- ============================= MAIN APP ============================= -->
+<div class="app" id="mainApp" style="display:none">
+ 
+  <header class="topbar">
+    <div class="brand">
+      <span class="mono">L&amp;D · Behavioural Science Suite</span>
+      <h1>DISC <em>Profiler</em> &amp; Job Analysis</h1>
+      <span class="subtle" id="topSub">Assess · Upload · Compare · Decide</span>
+    </div>
+    <div class="topbar-right">
+      <span class="role-badge" id="roleBadge">Admin</span>
+      <span class="subtle" id="userLabel"></span>
+      <button class="btn sm" id="btnExport" onclick="exportAll()">⬇ Export</button>
+      <button class="btn sm" id="btnImport" onclick="document.getElementById('importFile').click()">⬆ Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importAll(event)"/>
+      <button class="btn sm danger" onclick="logout()">Logout</button>
+    </div>
+  </header>
+ 
+  <nav class="tabs" id="tabBar">
+    <button class="tab active" data-tab="dashboard" data-role="admin">Dashboard</button>
+    <button class="tab" data-tab="registry" data-role="admin">Staff Registry &amp; OTP</button>
+    <button class="tab" data-tab="staff" data-role="admin">Profiles</button>
+    <button class="tab" data-tab="uploads" data-role="admin">Upload JD / External Profile</button>
+    <button class="tab" data-tab="jobanalysis" data-role="admin">Job Analysis Chart</button>
+    <button class="tab" data-tab="compare" data-role="admin">Critical Fit Analysis</button>
+    <button class="tab" data-tab="reference" data-role="admin">DISC Reference</button>
+    <button class="tab" data-tab="settings" data-role="admin">Settings</button>
+    <button class="tab" data-tab="assess" data-role="both">Take Assessment</button>
+  </nav>
+ 
+  <!-- ============ DASHBOARD ============ -->
+  <section class="panel active" id="panel-dashboard">
+    <div class="card">
+      <div class="card-title"><div><h2>Overview</h2><span class="subtle">Behavioural landscape at a glance.</span></div></div>
+      <div class="form-grid" id="dashStats"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><h3>DISC distribution across staff</h3></div>
+      <div style="position:relative;height:260px"><canvas id="dashChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><h3>Recent profiles</h3><button class="btn sm" onclick="switchTab('staff')">View all →</button></div>
+      <div id="recentProfiles"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><h3>Assessment status — pending OTPs</h3><button class="btn sm" onclick="switchTab('registry')">Go to registry →</button></div>
+      <div id="pendingPanel"></div>
+    </div>
+  </section>
+ 
+  <!-- ============ REGISTRY ============ -->
+  <section class="panel" id="panel-registry">
+    <div class="analysis-grid">
+      <div class="card">
+        <div class="card-title"><h3>Register a staff member</h3></div>
+        <p class="subtle" style="margin-bottom:12px">Add staff + mobile number. Generate a 6-digit OTP they use to sign in and take the assessment.</p>
+        <div class="form-grid">
+          <div class="field"><label>Full name *</label><input id="regName" placeholder="e.g. Priya Subramanian"/></div>
+          <div class="field"><label>Mobile (10-digit) *</label>
+            <div class="phone-prefix"><span>+91</span><input id="regMobile" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"/></div>
+          </div>
+          <div class="field"><label>Employee ID</label><input id="regEmp" placeholder="e.g. GRT-0123"/></div>
+          <div class="field"><label>Designation</label><input id="regRole" placeholder="e.g. Senior Sales Associate"/></div>
+          <div class="field"><label>Showroom / Region</label><input id="regShow" placeholder="e.g. T. Nagar — ROTN"/></div>
+          <div class="field"><label>Department</label>
+            <select id="regDept">
+              <option value="">Select…</option>
+              <option>Sales Floor</option><option>Customer Experience</option>
+              <option>Appraisal / JPP</option><option>Operations</option>
+              <option>Cashiering</option><option>Back Office</option>
+              <option>L&amp;D</option><option>Leadership</option>
+              <option>Security</option><option>Housekeeping</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:14px" class="btn-row">
+          <button class="btn gold" onclick="registerStaff()">Register &amp; Generate OTP →</button>
+          <button class="btn" onclick="bulkRegisterOpen()">Bulk add (CSV)</button>
+        </div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title"><h3>Stats</h3></div>
+        <div id="regStats"></div>
+        <div class="rule"></div>
+        <h4>How OTPs work</h4>
+        <ol style="padding-left:20px;font-size:13px;line-height:1.7;margin-top:8px">
+          <li>Register the staff member with their mobile number.</li>
+          <li>App generates a 6-digit OTP (valid 24 hours — configurable).</li>
+          <li>Click <strong>Share via WhatsApp</strong> — message auto-fills.</li>
+          <li>Staff opens app, picks language + mobile + OTP → goes to assessment.</li>
+          <li>On submit, OTP is consumed. Regenerate if lost.</li>
+        </ol>
+      </div>
+    </div>
+ 
+    <div class="card">
+      <div class="card-title">
+        <div><h3>Staff Registry</h3><span class="subtle">All registered staff, their OTPs, and assessment status.</span></div>
+        <div class="btn-row">
+          <input class="btn sm" style="padding:8px 12px;width:220px" id="regSearch" placeholder="Search…" oninput="renderRegistry()"/>
+          <select class="btn sm" id="regFilter" onchange="renderRegistry()">
+            <option value="">All status</option>
+            <option value="pending">Pending</option>
+            <option value="done">Completed</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Mobile</th><th>Role</th><th>Showroom</th><th>OTP</th><th>Status</th><th>Expires</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="regTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ============ ASSESSMENT ============ -->
+  <section class="panel" id="panel-assess">
+    <div class="card" id="adminAssessPicker" style="display:none">
+      <div class="card-title"><h3>Start a supervised assessment</h3></div>
+      <p class="subtle" style="margin-bottom:12px">Pick a registered staff member, or enter ad-hoc details for someone new.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label>Registered staff</label>
+          <select id="adminAssessPick" onchange="adminPickStaffChange()">
+            <option value="">— Choose someone —</option>
+            <option value="_adhoc">➕ Ad-hoc (not in registry)</option>
+          </select>
+        </div>
+        <div class="field" id="adhocNameField" style="display:none"><label>Name *</label><input id="adhocName"/></div>
+        <div class="field" id="adhocMobField" style="display:none"><label>Mobile</label><input id="adhocMob" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"/></div>
+        <div class="field" id="adhocRoleField" style="display:none"><label>Designation</label><input id="adhocRole"/></div>
+        <div class="field" id="adhocShowField" style="display:none"><label>Showroom</label><input id="adhocShow"/></div>
+        <div class="field"><label>Language</label>
+          <select id="adminAssessLang"></select>
+        </div>
+      </div>
+      <div style="margin-top:14px" class="btn-row">
+        <button class="btn gold" onclick="adminBeginAssessment()">Begin assessment →</button>
+      </div>
+    </div>
+ 
+    <div class="assessment-header" id="assessHeaderBox" style="display:none">
+      <div class="flex-between">
+        <div>
+          <h2 id="assessHeading">DISC Personality Profile Assessment</h2>
+          <p class="subtle" style="margin-top:4px" id="assessInstruction">24 groups · Pick the word <strong>MOST</strong> like you and the word <strong>LEAST</strong> like you in each group.</p>
+          <p class="subtle" style="margin-top:4px" id="assessWho"></p>
+        </div>
+        <div style="text-align:right">
+          <div class="subtle" id="progressLbl">Progress</div>
+          <div id="progressText" style="font-family:'Fraunces',serif;font-size:1.4rem">0 / 24</div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+ 
+    <div id="questionsContainer"></div>
+ 
+    <div id="assessFooter" style="display:none;justify-content:space-between;gap:12px;margin-top:20px">
+      <button class="btn" onclick="clearAssessment()" id="btnClear">Clear responses</button>
+      <button class="btn gold" onclick="submitAssessment()" id="btnSubmit">Submit Assessment →</button>
+    </div>
+  </section>
+ 
+  <!-- ============ PROFILES ============ -->
+  <section class="panel" id="panel-staff">
+    <div class="card">
+      <div class="card-title">
+        <div><h2>Staff Profiles</h2><span class="subtle">All DISC profiles captured.</span></div>
+        <div class="btn-row">
+          <input class="btn sm" style="padding:8px 12px;width:200px" id="staffSearch" placeholder="Search…" oninput="renderStaffList()"/>
+          <select class="btn sm" id="staffFilter" onchange="renderStaffList()">
+            <option value="">All profiles</option>
+            <option value="D">High D</option><option value="I">High I</option>
+            <option value="S">High S</option><option value="C">High C</option>
+          </select>
+          <select class="btn sm" id="staffSource" onchange="renderStaffList()">
+            <option value="">All sources</option>
+            <option value="assessment">Self-assessed</option>
+            <option value="admin-supervised">Admin supervised</option>
+            <option value="upload">Uploaded</option>
+            <option value="seed">Seed / sample</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Mobile</th><th>Role</th><th>Showroom</th><th>Primary</th><th>D</th><th>I</th><th>S</th><th>C</th><th>Date</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="staffTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ============ UPLOADS ============ -->
+  <section class="panel" id="panel-uploads">
+    <div class="analysis-grid">
+      <div class="card">
+        <div class="card-title"><h3>⬆ Upload existing DISC profile</h3></div>
+        <p class="subtle" style="margin-bottom:12px">From Thomas, Everything DiSC, TTI etc.</p>
+        <div class="drop-zone" id="profileDrop" onclick="document.getElementById('profileFileInput').click()">
+          <div class="icon">📄</div><div><strong>Drop or click to upload</strong></div><div class="sub">CSV or JSON</div>
+        </div>
+        <input type="file" id="profileFileInput" accept=".csv,.json,.txt" style="display:none"/>
+        <div class="rule"></div>
+        <h4 style="margin-bottom:10px">Or enter manually</h4>
+        <div class="form-grid">
+          <div class="field"><label>Staff name *</label><input id="mProfName"/></div>
+          <div class="field"><label>Mobile</label><input id="mProfMobile"/></div>
+          <div class="field"><label>Role</label><input id="mProfRole"/></div>
+          <div class="field"><label>Showroom</label><input id="mProfShow"/></div>
+        </div>
+        <div class="form-grid" style="margin-top:10px">
+          <div class="field"><label>D (0-100)</label><input type="number" id="mProfD" min="0" max="100"/></div>
+          <div class="field"><label>I (0-100)</label><input type="number" id="mProfI" min="0" max="100"/></div>
+          <div class="field"><label>S (0-100)</label><input type="number" id="mProfS" min="0" max="100"/></div>
+          <div class="field"><label>C (0-100)</label><input type="number" id="mProfC" min="0" max="100"/></div>
+        </div>
+        <div style="margin-top:12px"><button class="btn gold" onclick="addManualProfile()">Save profile</button></div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title"><h3>⬆ Upload Job Description &amp; Specification</h3></div>
+        <p class="subtle" style="margin-bottom:12px">System parses keywords and suggests the ideal DISC profile for the role.</p>
+        <div class="drop-zone" id="jdDrop" onclick="document.getElementById('jdFileInput').click()">
+          <div class="icon">📑</div><div><strong>Drop or click to upload JD/JS</strong></div><div class="sub">TXT / MD / CSV</div>
+        </div>
+        <input type="file" id="jdFileInput" accept=".txt,.csv,.json,.md" style="display:none"/>
+        <div class="rule"></div>
+        <div class="form-grid">
+          <div class="field"><label>Role title *</label><input id="jdTitle"/></div>
+          <div class="field"><label>Department</label><input id="jdDept"/></div>
+          <div class="field"><label>Reports to</label><input id="jdReports"/></div>
+          <div class="field"><label>Band / Grade</label><input id="jdBand"/></div>
+        </div>
+        <div class="field" style="margin-top:10px"><label>Job Description</label><textarea id="jdDesc" rows="5"></textarea></div>
+        <div class="field" style="margin-top:10px"><label>Job Specification</label><textarea id="jdSpec" rows="5"></textarea></div>
+        <div style="margin-top:12px"><button class="btn gold" onclick="saveJD()">Save JD/JS &amp; Auto-suggest DISC →</button></div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ============ JOB ANALYSIS ============ -->
+  <section class="panel" id="panel-jobanalysis">
+    <div class="card">
+      <div class="card-title">
+        <div><h2>Job Analysis Chart</h2><span class="subtle">Build the ideal behavioural profile for a role.</span></div>
+        <select class="btn sm" id="jdSelect" onchange="loadJDForAnalysis()"><option value="">Select a role…</option></select>
+      </div>
+      <div id="jdDetails" class="empty-state"><div class="icon">📋</div><div>Select a role to build its Job Analysis chart.</div></div>
+      <div id="jdAnalysisBody" style="display:none">
+        <div class="analysis-grid">
+          <div>
+            <div class="card tight">
+              <h4 id="jdDispTitle">—</h4>
+              <div class="subtle" id="jdDispMeta"></div>
+              <div class="rule"></div>
+              <div style="font-size:12.5px;line-height:1.6"><strong>Key keywords extracted:</strong><div id="jdKeywords" style="margin-top:6px"></div></div>
+            </div>
+            <div class="card tight">
+              <h4>Ideal DISC profile (adjust sliders)</h4>
+              <p class="subtle" style="margin-bottom:12px">Auto-suggested from JD. Drag to refine.</p>
+              <div class="slider-row" style="display:grid;grid-template-columns:40px 1fr 60px;gap:10px;align-items:center;margin-bottom:10px">
+                <span class="disc-badge disc-D">D</span><input type="range" id="idealD" min="0" max="100" value="60" oninput="updateIdeal()" style="accent-color:var(--gold)"/><span style="font-weight:600;text-align:right" id="idealDv">60</span>
+              </div>
+              <div class="slider-row" style="display:grid;grid-template-columns:40px 1fr 60px;gap:10px;align-items:center;margin-bottom:10px">
+                <span class="disc-badge disc-I">I</span><input type="range" id="idealI" min="0" max="100" value="60" oninput="updateIdeal()" style="accent-color:var(--gold)"/><span style="font-weight:600;text-align:right" id="idealIv">60</span>
+              </div>
+              <div class="slider-row" style="display:grid;grid-template-columns:40px 1fr 60px;gap:10px;align-items:center;margin-bottom:10px">
+                <span class="disc-badge disc-S">S</span><input type="range" id="idealS" min="0" max="100" value="50" oninput="updateIdeal()" style="accent-color:var(--gold)"/><span style="font-weight:600;text-align:right" id="idealSv">50</span>
+              </div>
+              <div class="slider-row" style="display:grid;grid-template-columns:40px 1fr 60px;gap:10px;align-items:center;margin-bottom:10px">
+                <span class="disc-badge disc-C">C</span><input type="range" id="idealC" min="0" max="100" value="50" oninput="updateIdeal()" style="accent-color:var(--gold)"/><span style="font-weight:600;text-align:right" id="idealCv">50</span>
+              </div>
+              <div class="field" style="margin-top:10px"><label>Tolerance (± points)</label><input type="number" id="tolerance" value="15" min="5" max="40" onchange="updateIdeal()"/></div>
+              <div style="margin-top:12px" class="btn-row">
+                <button class="btn" onclick="resetIdealFromJD()">↻ Re-suggest from JD</button>
+                <button class="btn gold" onclick="saveIdealProfile()">Save Job Profile</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card tight">
+              <h4>Job Profile — PPA-style plot</h4>
+              <div id="jdPpaPlot" style="margin-top:10px"></div>
+            </div>
+            <div class="card tight">
+              <h4>Behavioural competencies required</h4>
+              <div id="jdCompetencies" style="font-size:13px"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card tight" style="margin-top:16px">
+          <h4>Critical role analysis</h4>
+          <div id="jdCriticalAnalysis"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ============ COMPARE ============ -->
+  <section class="panel" id="panel-compare">
+    <div class="card">
+      <div class="card-title"><div><h2>Critical Fit Analysis</h2><span class="subtle">Overlay a staff profile against a job profile.</span></div></div>
+      <div class="form-grid">
+        <div class="field"><label>Select Staff Profile</label><select id="cmpStaff" onchange="runComparison()"><option value="">Choose…</option></select></div>
+        <div class="field"><label>Select Job Profile</label><select id="cmpJob" onchange="runComparison()"><option value="">Choose…</option></select></div>
+      </div>
+      <div id="cmpBody" style="display:none;margin-top:20px">
+        <div class="analysis-grid">
+          <div class="card tight">
+            <h4>Staff profile (3 graphs) vs Job profile</h4>
+            <div id="cmpPpaPlot"></div>
+          </div>
+          <div class="card tight">
+            <h4>Fit Score</h4>
+            <div style="margin:14px 0;padding:14px;border-radius:8px;background:var(--cream);border:1px solid var(--rule)">
+              <div style="font-family:'Fraunces',serif;font-size:2.8rem;line-height:1;font-weight:500" id="fitScore">—</div>
+              <div class="subtle" id="fitVerdict">Awaiting selection…</div>
+              <div class="progress-bar" style="margin-top:12px"><div class="progress-fill" id="fitBar" style="width:0%"></div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 80px 80px 80px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">
+              <div>Dim</div><div>Aspect</div><div style="text-align:center">Ideal</div><div style="text-align:center">Actual</div><div style="text-align:center">Gap</div>
+            </div>
+            <div id="gapRows"></div>
+          </div>
+        </div>
+        <div class="critical-panel"><h3>🔍 Critical Analysis &amp; Recommendations</h3><div id="criticalInsights"></div></div>
+        <div class="card tight" style="margin-top:16px"><h4>Development plan</h4><div id="devPlan" style="font-size:13.5px;line-height:1.7"></div></div>
+        <div style="margin-top:16px"><button class="btn gold" onclick="printComparison()">🖨 Print / Save report</button></div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ============ REFERENCE ============ -->
+  <section class="panel" id="panel-reference">
+    <div class="card">
+      <h2>DISC Reference Guide</h2>
+      <p class="subtle" style="margin-top:6px">DISC describes observable work style, not capability.</p>
+      <div class="rule"></div>
+      <div class="analysis-grid">
+        <div><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="disc-badge disc-D">D</span><h3>Dominance</h3></div><p style="font-size:13.5px;line-height:1.6"><strong>How people respond to problems &amp; challenges.</strong> High-D: direct, decisive, results-oriented, competitive. Low-D: cooperative, low-key, reflective.</p></div>
+        <div><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="disc-badge disc-I">I</span><h3>Influence</h3></div><p style="font-size:13.5px;line-height:1.6"><strong>How people influence others.</strong> High-I: outgoing, persuasive, enthusiastic. Low-I: reserved, analytical.</p></div>
+        <div><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="disc-badge disc-S">S</span><h3>Steadiness</h3></div><p style="font-size:13.5px;line-height:1.6"><strong>How people pace themselves &amp; respond to change.</strong> High-S: patient, dependable, consistent.</p></div>
+        <div><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="disc-badge disc-C">C</span><h3>Conscientiousness</h3></div><p style="font-size:13.5px;line-height:1.6"><strong>How people respond to rules &amp; procedures.</strong> High-C: precise, analytical, systematic.</p></div>
+      </div>
+      <div class="rule"></div>
+      <h3>Understanding the three graphs</h3>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:6px">
+        <strong>Graph I — Work Mask:</strong> How the person believes they need to behave at work. Derived from "Most" selections.<br>
+        <strong>Graph II — Behaviour Under Pressure:</strong> The instinctive self that emerges under stress. Derived from "Least" selections.<br>
+        <strong>Graph III — Self-Image:</strong> The integrated, perceived self. The net pattern of Most minus Least.
+      </p>
+    </div>
+  </section>
+ 
+  <!-- ============ SETTINGS ============ -->
+  <section class="panel" id="panel-settings">
+    <div class="card">
+      <h2>Admin Settings</h2>
+      <div class="form-grid" style="margin-top:14px">
+        <div class="field"><label>Organisation name</label><input id="setOrg"/></div>
+        <div class="field"><label>WhatsApp sender signature</label><input id="setSender"/></div>
+        <div class="field"><label>OTP validity (hours)</label><input id="setExpiry" type="number" min="1" max="168" value="24"/></div>
+      </div>
+      <div class="rule"></div>
+      <h4>Change admin password</h4>
+      <div class="form-grid" style="margin-top:10px">
+        <div class="field"><label>Current password</label><input id="curPw" type="password" autocomplete="new-password"/></div>
+        <div class="field"><label>New password</label><input id="newPw" type="password" autocomplete="new-password"/></div>
+        <div class="field"><label>Confirm new password</label><input id="confPw" type="password" autocomplete="new-password"/></div>
+      </div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn primary" onclick="saveSettings()">Save Settings</button>
+        <button class="btn gold" onclick="changePassword()">Change Password</button>
+      </div>
+      <div class="rule"></div>
+      <h4>Seed data</h4>
+      <p class="subtle" style="margin:6px 0 10px">20 realistic sample profiles were pre-loaded so the app is never empty.</p>
+      <button class="btn" onclick="reloadSeed()">↻ Restore seed profiles</button>
+      <button class="btn danger" onclick="removeSeed()">Remove all seed profiles</button>
+      <div class="rule"></div>
+      <h4>Danger zone</h4>
+      <button class="btn danger" onclick="resetAll()">Reset all data (keep password)</button>
+    </div>
+  </section>
+ 
+</div>
+ 
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+ 
+<script>
+/* =============================================================
+   DISC PROFILER v3 — multilingual + Thomas-style 3-graph + seed
+   ============================================================= */
+ 
+const STORE_KEY = 'disc_profiler_v3';
+ 
+/* ---------- Translations ---------- */
+const LANGS = [
+  {code:'en', name:'English'},
+  {code:'ta', name:'தமிழ் (Tamil)'},
+  {code:'te', name:'తెలుగు (Telugu)'},
+  {code:'kn', name:'ಕನ್ನಡ (Kannada)'},
+  {code:'ml', name:'മലയാളം (Malayalam)'},
+  {code:'hi', name:'हिन्दी (Hindi)'}
+];
+ 
+/* 24 question groups. Each entry = array of 4 adjectives tagged D/I/S/C.
+   Translation maps keyed by English base adjective. */
+const QUESTIONS_EN = [
+  ['Adventurous|D','Inspiring|I','Gentle|S','Precise|C'],
+  ['Forceful|D','Talkative|I','Loyal|S','Accurate|C'],
+  ['Competitive|D','Charming|I','Consistent|S','Analytical|C'],
+  ['Bold|D','Sociable|I','Patient|S','Logical|C'],
+  ['Decisive|D','Optimistic|I','Predictable|S','Systematic|C'],
+  ['Direct|D','Enthusiastic|I','Steady|S','Detailed|C'],
+  ['Driven|D','Persuasive|I','Dependable|S','Cautious|C'],
+  ['Results-oriented|D','Expressive|I','Accommodating|S','Perfectionist|C'],
+  ['Risk-taker|D','Lively|I','Calm|S','Thorough|C'],
+  ['Demanding|D','Outgoing|I','Diplomatic|S','Orderly|C'],
+  ['Assertive|D','Playful|I','Sincere|S','Careful|C'],
+  ['Pioneering|D','Magnetic|I','Relaxed|S','Conventional|C'],
+  ['Authoritative|D','Trusting|I','Even-tempered|S','Disciplined|C'],
+  ['Ambitious|D','Friendly|I','Amiable|S','Conservative|C'],
+  ['Independent|D','Generous|I','Modest|S','Restrained|C'],
+  ['Self-reliant|D','Warm|I','Good listener|S','Fact-finder|C'],
+  ['Tough|D','Animated|I','Understanding|S','Exacting|C'],
+  ['Daring|D','Impulsive|I','Agreeable|S','Formal|C'],
+  ['Action-oriented|D','Chatty|I','Harmonising|S','Observant|C'],
+  ['Resolute|D','Upbeat|I','Nurturing|S','Rule-bound|C'],
+  ['Strong-willed|D','Emotional|I','Possessive|S','Sceptical|C'],
+  ['Argumentative|D','Dramatic|I','Unhurried|S','Worrying|C'],
+  ['Headstrong|D','Flashy|I','Submissive|S','Hesitant|C'],
+  ['Confrontational|D','Confident|I','Content|S','Vigilant|C'],
+];
+ 
+/* Translation dictionary: key = English, value = {ta, te, kn, ml, hi} */
+const T = {
+  // Adjectives — all 96 words × 5 languages
+  'Adventurous':{ta:'துணிகர',te:'సాహసవంతుడు',kn:'ಸಾಹಸಿ',ml:'സാഹസികൻ',hi:'साहसी'},
+  'Inspiring':{ta:'உத்வேகமூட்டும்',te:'ప్రేరణాత్మక',kn:'ಪ್ರೇರಕ',ml:'പ്രചോദകൻ',hi:'प्रेरणादायी'},
+  'Gentle':{ta:'மென்மையான',te:'మృదువైన',kn:'ಮೃದು',ml:'സൗമ്യൻ',hi:'कोमल'},
+  'Precise':{ta:'துல்லியமான',te:'ఖచ్చితమైన',kn:'ನಿಖರ',ml:'കൃത്യതയുള്ള',hi:'सटीक'},
+  'Forceful':{ta:'கடின',te:'దృఢమైన',kn:'ದೃಢ',ml:'ദൃഢൻ',hi:'दृढ़'},
+  'Talkative':{ta:'பேசக்கூடிய',te:'మాటలవాడు',kn:'ಮಾತನಾಡುವ',ml:'സംസാരപ്രിയൻ',hi:'बातूनी'},
+  'Loyal':{ta:'நம்பகமான',te:'విశ్వాసపాత్రుడు',kn:'ನಿಷ್ಠಾವಂತ',ml:'വിശ്വസ്തൻ',hi:'वफ़ादार'},
+  'Accurate':{ta:'சரியான',te:'నిర్దుష్టమైన',kn:'ಸರಿಯಾದ',ml:'കൃത്യം',hi:'सटीक'},
+  'Competitive':{ta:'போட்டியிடும்',te:'పోటీతత్వ',kn:'ಸ್ಪರ್ಧಾತ್ಮಕ',ml:'മത്സരസ്വഭാവി',hi:'प्रतिस्पर्धी'},
+  'Charming':{ta:'கவர்ச்சியான',te:'ఆకర్షణీయమైన',kn:'ಆಕರ್ಷಕ',ml:'ആകർഷകൻ',hi:'आकर्षक'},
+  'Consistent':{ta:'நிலையான',te:'స్థిరమైన',kn:'ಸ್ಥಿರ',ml:'സ്ഥിരത',hi:'सुसंगत'},
+  'Analytical':{ta:'பகுப்பாய்வு',te:'విశ్లేషణాత్మక',kn:'ವಿಶ್ಲೇಷಣಾತ್ಮಕ',ml:'വിശകലനാത്മകൻ',hi:'विश्लेषणात्मक'},
+  'Bold':{ta:'துணிவான',te:'ధైర్యవంతుడు',kn:'ಧೈರ್ಯಶಾಲಿ',ml:'ധൈര്യശാലി',hi:'साहसी'},
+  'Sociable':{ta:'நட்புமிக்க',te:'సామాజిక',kn:'ಸಾಮಾಜಿಕ',ml:'സാമൂഹികൻ',hi:'मिलनसार'},
+  'Patient':{ta:'பொறுமையான',te:'ఓపికగల',kn:'ತಾಳ್ಮೆಯ',ml:'ക്ഷമയുള്ള',hi:'धैर्यवान'},
+  'Logical':{ta:'தர்க்க',te:'తార్కిక',kn:'ತಾರ್ಕಿಕ',ml:'യുക്തിബോധമുള്ള',hi:'तार्किक'},
+  'Decisive':{ta:'தீர்மான',te:'నిర్ణాయక',kn:'ನಿರ್ಣಾಯಕ',ml:'നിർണ്ണായകൻ',hi:'निर्णायक'},
+  'Optimistic':{ta:'நம்பிக்கையான',te:'ఆశావాది',kn:'ಆಶಾವಾದಿ',ml:'ശുഭാപ്തി',hi:'आशावादी'},
+  'Predictable':{ta:'எதிர்பார்க்கக்கூடிய',te:'ఊహించదగిన',kn:'ಊಹಿಸಬಲ್ಲ',ml:'പ്രതീക്ഷിക്കാവുന്ന',hi:'अनुमानयोग्य'},
+  'Systematic':{ta:'முறையான',te:'క్రమబద్ధ',kn:'ಕ್ರಮಬದ್ಧ',ml:'ക്രമീകൃത',hi:'व्यवस्थित'},
+  'Direct':{ta:'நேரடியான',te:'ప్రత్యక్ష',kn:'ನೇರ',ml:'നേരിട്ടുള്ള',hi:'सीधा'},
+  'Enthusiastic':{ta:'உற்சாகமான',te:'ఉత్సాహవంతుడు',kn:'ಉತ್ಸಾಹಿ',ml:'ഉത്സാഹി',hi:'उत्साही'},
+  'Steady':{ta:'ஸ்திரமான',te:'స్థిర',kn:'ಸ್ಥಿರ',ml:'സ്ഥിരൻ',hi:'स्थिर'},
+  'Detailed':{ta:'விரிவான',te:'వివరమైన',kn:'ವಿವರವಾದ',ml:'വിശദമായ',hi:'विस्तृत'},
+  'Driven':{ta:'உந்தப்பட்ட',te:'తీవ్రంగా పనిచేసే',kn:'ಗುರಿಕೇಂದ್ರಿತ',ml:'ലക്ഷ്യബോധമുള്ള',hi:'प्रेरित'},
+  'Persuasive':{ta:'வற்புறுத்தும்',te:'ఒప్పించగల',kn:'ಮನವೊಲಿಸುವ',ml:'പ്രേരിപ്പിക്കുന്ന',hi:'समझाने वाला'},
+  'Dependable':{ta:'நம்பகமான',te:'ఆధారపడదగిన',kn:'ವಿಶ್ವಾಸಾರ್ಹ',ml:'ആശ്രയിക്കാവുന്ന',hi:'भरोसेमंद'},
+  'Cautious':{ta:'எச்சரிக்கையான',te:'జాగ్రత్తగా',kn:'ಎಚ್ಚರಿಕೆಯ',ml:'ജാഗ്രത',hi:'सतर्क'},
+  'Results-oriented':{ta:'முடிவு நோக்கிய',te:'ఫలితం-ఆధారిత',kn:'ಫಲಿತಾಂಶ ಕೇಂದ್ರಿತ',ml:'ഫലാധിഷ്ഠിത',hi:'परिणाम-केंद्रित'},
+  'Expressive':{ta:'வெளிப்படையான',te:'వ్యక్తీకరణాత్మక',kn:'ಅಭಿವ್ಯಕ್ತ',ml:'ആവിഷ്കരണശീലൻ',hi:'अभिव्यक्त'},
+  'Accommodating':{ta:'இணங்கும்',te:'సర్దుబాటు',kn:'ಸಹಕಾರಿ',ml:'സഹകരണശീലൻ',hi:'समायोजन करने वाला'},
+  'Perfectionist':{ta:'முழுமைவாதி',te:'పరిపూర్ణతావాది',kn:'ಪರಿಪೂರ್ಣತಾ ಪ್ರಿಯ',ml:'പൂർണ്ണതാവാദി',hi:'पूर्णतावादी'},
+  'Risk-taker':{ta:'ஆபத்தை ஏற்பவர்',te:'రిస్క్ తీసుకునేవారు',kn:'ಅಪಾಯ-ತೆಗೆದುಕೊಳ್ಳುವ',ml:'അപകടസാധ്യത ഏറ്റെടുക്കുന്നയാൾ',hi:'जोखिम लेने वाला'},
+  'Lively':{ta:'சுறுசுறுப்பான',te:'చురుకైన',kn:'ಉಲ್ಲಾಸಭರಿತ',ml:'ഉന്മേഷമുള്ള',hi:'जीवंत'},
+  'Calm':{ta:'அமைதியான',te:'ప్రశాంత',kn:'ಶಾಂತ',ml:'ശാന്തൻ',hi:'शांत'},
+  'Thorough':{ta:'முழுமையான',te:'సమగ్ర',kn:'ಸಂಪೂರ್ಣ',ml:'സമഗ്രൻ',hi:'पूर्ण'},
+  'Demanding':{ta:'கேட்கக்கூடிய',te:'డిమాండింగ్',kn:'ಬೇಡಿಕೆಯುಳ್ಳ',ml:'അവശ്യപ്പെടുന്ന',hi:'मांग करने वाला'},
+  'Outgoing':{ta:'வெளியேறும்',te:'బయటికి వచ్చే',kn:'ಹೊರಹೋಗುವ',ml:'സൗഹൃദമുള്ള',hi:'मिलनसार'},
+  'Diplomatic':{ta:'கூர்மதியான',te:'దౌత్యనైపుణ్యం',kn:'ರಾಜತಾಂತ್ರಿಕ',ml:'നയതന്ത്രജ്ഞൻ',hi:'कूटनीतिक'},
+  'Orderly':{ta:'ஒழுங்கான',te:'క్రమశిక్షణగల',kn:'ಕ್ರಮಬದ್ಧ',ml:'ക്രമമുള്ള',hi:'व्यवस्थित'},
+  'Assertive':{ta:'உறுதியான',te:'ధృఢ',kn:'ದೃಢನಿಶ್ಚಯ',ml:'ദൃഢനിലപാടുകാരൻ',hi:'मुखर'},
+  'Playful':{ta:'விளையாட்டுத்தனமான',te:'ఉల్లాసవంతుడు',kn:'ಆಟವಾಡುವ',ml:'കളിപ്രിയൻ',hi:'खिलंदड़'},
+  'Sincere':{ta:'உண்மையான',te:'నిజాయితీ',kn:'ಪ್ರಾಮಾಣಿಕ',ml:'ആത്മാർത്ഥൻ',hi:'ईमानदार'},
+  'Careful':{ta:'கவனமான',te:'జాగ్రత్త',kn:'ಎಚ್ಚರಿಕೆ',ml:'ശ്രദ്ധാലു',hi:'सावधान'},
+  'Pioneering':{ta:'முன்னோடியான',te:'మార్గదర్శక',kn:'ಮಾರ್ಗದರ್ಶಿ',ml:'തുടക്കക്കാരൻ',hi:'अग्रणी'},
+  'Magnetic':{ta:'ஈர்ப்புமிக்க',te:'ఆకర్షణీయ',kn:'ಆಕರ್ಷಕ',ml:'ആകർഷകൻ',hi:'आकर्षक'},
+  'Relaxed':{ta:'தளர்வான',te:'సడలిన',kn:'ವಿಶ್ರಾಂತ',ml:'വിശ്രാന്തൻ',hi:'शांतचित्त'},
+  'Conventional':{ta:'பாரம்பரியமான',te:'సాంప్రదాయ',kn:'ಸಾಂಪ್ರದಾಯಿಕ',ml:'പാരമ്പര്യവാദി',hi:'पारंपरिक'},
+  'Authoritative':{ta:'அதிகாரப்பூர்வ',te:'అధికారిక',kn:'ಅಧಿಕೃತ',ml:'ആജ്ഞാശക്തിയുള്ള',hi:'आधिकारिक'},
+  'Trusting':{ta:'நம்பிக்கையுள்ள',te:'నమ్మే',kn:'ನಂಬಿಕೆಯುಳ್ಳ',ml:'വിശ്വസിക്കുന്ന',hi:'भरोसा करने वाला'},
+  'Even-tempered':{ta:'சீரான மனநிலை',te:'సమస్థితి',kn:'ಸಮಚಿತ್ತ',ml:'സമചിത്തൻ',hi:'सम-स्वभाव'},
+  'Disciplined':{ta:'ஒழுக்கமான',te:'క్రమశిక్షణాయుత',kn:'ಶಿಸ್ತಿನ',ml:'അച്ചടക്കമുള്ള',hi:'अनुशासित'},
+  'Ambitious':{ta:'லட்சியமான',te:'ఆశావంతుడు',kn:'ಮಹತ್ವಾಕಾಂಕ್ಷಿ',ml:'മോഹബുദ്ധി',hi:'महत्वाकांक्षी'},
+  'Friendly':{ta:'நட்பான',te:'స్నేహపూర్వక',kn:'ಸ್ನೇಹಿ',ml:'സൗഹൃദം',hi:'मैत्रीपूर्ण'},
+  'Amiable':{ta:'இனிமையான',te:'స్నేహశీల',kn:'ಸ್ನೇಹಮಯ',ml:'സൗമ്യശീലൻ',hi:'सौम्य'},
+  'Conservative':{ta:'பழமைவாதி',te:'సాంప్రదాయవాది',kn:'ಸಂಪ್ರದಾಯವಾದಿ',ml:'യാഥാസ്ഥിതികൻ',hi:'रूढ़िवादी'},
+  'Independent':{ta:'சுதந்திரமான',te:'స్వతంత్ర',kn:'ಸ್ವತಂತ್ರ',ml:'സ്വതന്ത്ര',hi:'स्वतंत्र'},
+  'Generous':{ta:'தாராள',te:'ఉదార',kn:'ಉದಾರ',ml:'ഉദാരൻ',hi:'उदार'},
+  'Modest':{ta:'அடக்கமான',te:'నమ్రత',kn:'ವಿನಮ್ರ',ml:'വിനീതൻ',hi:'विनम्र'},
+  'Restrained':{ta:'கட்டுப்பாடான',te:'నియంత్రిత',kn:'ಸಂಯಮಿ',ml:'നിയന്ത്രിതൻ',hi:'संयमित'},
+  'Self-reliant':{ta:'தன்னம்பிக்கை',te:'స్వావలంబన',kn:'ಸ್ವಾವಲಂಬಿ',ml:'സ്വയംപര്യാപ്തൻ',hi:'आत्मनिर्भर'},
+  'Warm':{ta:'அன்பான',te:'వెచ్చని',kn:'ಹೃದ್ಯ',ml:'ഊഷ്മളൻ',hi:'गर्मजोशी भरा'},
+  'Good listener':{ta:'நல்ல கேட்பவர்',te:'చక్కగా వినే',kn:'ಉತ್ತಮ ಕೇಳುಗ',ml:'നല്ല ശ്രോതാവ്',hi:'अच्छा श्रोता'},
+  'Fact-finder':{ta:'உண்மைத் தேடுபவர்',te:'వాస్తవాన్వేషి',kn:'ಸತ್ಯಾನ್ವೇಷಿ',ml:'വസ്തുതാന്വേഷി',hi:'तथ्य खोजने वाला'},
+  'Tough':{ta:'கடினமான',te:'కఠిన',kn:'ಕಠಿಣ',ml:'കഠിനൻ',hi:'कठोर'},
+  'Animated':{ta:'உயிருள்ள',te:'ఉత్తేజిత',kn:'ಚೈತನ್ಯಶೀಲ',ml:'ചലനാത്മകൻ',hi:'सजीव'},
+  'Understanding':{ta:'புரிந்துகொள்ளும்',te:'అవగాహన',kn:'ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವ',ml:'മനസ്സിലാക്കുന്ന',hi:'समझदार'},
+  'Exacting':{ta:'நெருக்கடியான',te:'కఠినమైన',kn:'ನಿಖರ',ml:'കൃത്യനിഷ്ഠൻ',hi:'कठोर मानकों वाला'},
+  'Daring':{ta:'துணிவான',te:'సాహసం',kn:'ಧೈರ್ಯಶಾಲಿ',ml:'സാഹസികൻ',hi:'हिम्मती'},
+  'Impulsive':{ta:'உந்துதலான',te:'ఉద్వేగ',kn:'ಪ್ರಚೋದನಾತ್ಮಕ',ml:'അപ്രതീക്ഷിതനീക്കം',hi:'आवेगी'},
+  'Agreeable':{ta:'ஒப்புக்கொள்ளும்',te:'అంగీకరించే',kn:'ಒಪ್ಪಿಗೆಯ',ml:'സമ്മതമുള്ള',hi:'सहमत होने वाला'},
+  'Formal':{ta:'முறைசார்ந்த',te:'ఫార్మల్',kn:'ಔಪಚಾರಿಕ',ml:'ഔപചാരികൻ',hi:'औपचारिक'},
+  'Action-oriented':{ta:'செயல் நோக்கிய',te:'చర్యాత్మక',kn:'ಕ್ರಿಯಾಶೀಲ',ml:'പ്രവർത്തനപരൻ',hi:'क्रिया-उन्मुख'},
+  'Chatty':{ta:'அரட்டையான',te:'కబుర్లు చెప్పే',kn:'ಹರಟೆಯ',ml:'വാചകപ്രിയൻ',hi:'बातूनी'},
+  'Harmonising':{ta:'இணக்கமான',te:'సామరస్య',kn:'ಸಾಮರಸ್ಯ',ml:'സമന്വയശീലൻ',hi:'सामंजस्यकारी'},
+  'Observant':{ta:'கவனிக்கும்',te:'గమనించే',kn:'ಗಮನಶೀಲ',ml:'നിരീക്ഷണശീലൻ',hi:'चौकस'},
+  'Resolute':{ta:'உறுதியான',te:'దృఢనిశ్చయ',kn:'ಅಚಲ',ml:'അചഞ്ചലൻ',hi:'अडिग'},
+  'Upbeat':{ta:'மகிழ்ச்சியான',te:'ఉల్లాస',kn:'ಉಲ್ಲಾಸಭರಿತ',ml:'പ്രസന്നത',hi:'प्रसन्नचित्त'},
+  'Nurturing':{ta:'பராமரிக்கும்',te:'పోషించే',kn:'ಪೋಷಿಸುವ',ml:'പരിപാലകൻ',hi:'पोषण करने वाला'},
+  'Rule-bound':{ta:'விதிமுறையான',te:'నియమపాలకుడు',kn:'ನಿಯಮ ಪಾಲಕ',ml:'നിയമാനുസരണക്കാരൻ',hi:'नियम-बद्ध'},
+  'Strong-willed':{ta:'உறுதியான மனம்',te:'దృఢసంకల్ప',kn:'ದೃಢಸಂಕಲ್ಪ',ml:'ദൃഢനിശ്ചയം',hi:'दृढ़-इच्छाशक्ति'},
+  'Emotional':{ta:'உணர்ச்சிவசப்படும்',te:'భావోద్వేగ',kn:'ಭಾವನಾತ್ಮಕ',ml:'വികാരതീവ്രൻ',hi:'भावुक'},
+  'Possessive':{ta:'உடைமை கொண்ட',te:'స్వాధీన',kn:'ಸ್ವಾಮಿತ್ವ',ml:'കൈവശാസക്തൻ',hi:'अधिकार जताने वाला'},
+  'Sceptical':{ta:'சந்தேக',te:'సందేహాత్మక',kn:'ಸಂಶಯವಾದಿ',ml:'സംശയാലു',hi:'संशयी'},
+  'Argumentative':{ta:'வாதிடும்',te:'వాదించే',kn:'ವಾದ ಮಾಡುವ',ml:'തർക്കപ്രിയൻ',hi:'तर्कशील'},
+  'Dramatic':{ta:'நாடகீய',te:'నాటకీయ',kn:'ನಾಟಕೀಯ',ml:'നാടകീയൻ',hi:'नाटकीय'},
+  'Unhurried':{ta:'அவசரமற்ற',te:'హడావుడి లేని',kn:'ಅವಸರವಿಲ್ಲದ',ml:'തിരക്കില്ലാത്തവൻ',hi:'अविलंबित'},
+  'Worrying':{ta:'கவலைப்படும்',te:'చింతించే',kn:'ಚಿಂತಿಸುವ',ml:'ആശങ്കപ്പെടുന്ന',hi:'चिंता करने वाला'},
+  'Headstrong':{ta:'பிடிவாதமான',te:'మొండి',kn:'ಮೊಂಡ',ml:'ശാഠ്യക്കാരൻ',hi:'ज़िद्दी'},
+  'Flashy':{ta:'ஜாலியான',te:'ఆడంబర',kn:'ಆಡಂಬರ',ml:'ആഡംബരൻ',hi:'भड़कीला'},
+  'Submissive':{ta:'அடிபணியும்',te:'లోబడే',kn:'ವಿಧೇಯ',ml:'കീഴ്പ്പെടുന്നവൻ',hi:'समर्पणशील'},
+  'Hesitant':{ta:'தயக்கமான',te:'సంకోచ',kn:'ಹಿಂಜರಿಯುವ',ml:'മടിക്കുന്ന',hi:'हिचकिचाने वाला'},
+  'Confrontational':{ta:'நேரடியான மோதல்',te:'ఘర్షణాత్మక',kn:'ಎದುರಾಳಿ',ml:'നേരിട്ട് പോരാടുന്നവൻ',hi:'टकराव वाला'},
+  'Confident':{ta:'தன்னம்பிக்கையான',te:'ఆత్మవిశ్వాస',kn:'ಆತ್ಮವಿಶ್ವಾಸ',ml:'ആത്മവിശ്വാസം',hi:'आत्मविश्वासी'},
+  'Content':{ta:'திருப்தியான',te:'సంతృప్త',kn:'ತೃಪ್ತ',ml:'സംതൃപ്തൻ',hi:'संतुष्ट'},
+  'Vigilant':{ta:'விழிப்பான',te:'అప్రమత్త',kn:'ಜಾಗೃತ',ml:'ജാഗരൂകൻ',hi:'सतर्क'}
+};
+ 
+/* UI strings */
+const UI = {
+  signIn:{en:'Sign in to continue',ta:'தொடர உள்நுழையவும்',te:'కొనసాగించడానికి సైన్ ఇన్ చేయండి',kn:'ಮುಂದುವರಿಸಲು ಸೈನ್ ಇನ್ ಆಗಿ',ml:'തുടരാൻ സൈൻ ഇൻ ചെയ്യുക',hi:'जारी रखने के लिए साइन इन करें'},
+  staffTab:{en:'Staff · Assessment',ta:'ஊழியர் · மதிப்பீடு',te:'సిబ్బంది · మదింపు',kn:'ಸಿಬ್ಬಂದಿ · ಮೌಲ್ಯಮಾಪನ',ml:'ജീവനക്കാർ · വിലയിരുത്തൽ',hi:'स्टाफ़ · मूल्यांकन'},
+  adminTab:{en:'Admin · L&D',ta:'நிர்வாகி · L&D',te:'అడ్మిన్ · L&D',kn:'ನಿರ್ವಾಹಕ · L&D',ml:'അഡ്മിൻ · L&D',hi:'एडमिन · L&D'},
+  mobile:{en:'Mobile Number',ta:'கைபேசி எண்',te:'మొబైల్ నంబర్',kn:'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ',ml:'മൊബൈൽ നമ്പർ',hi:'मोबाइल नंबर'},
+  otp:{en:'OTP (6 digits)',ta:'OTP (6 இலக்கம்)',te:'OTP (6 అంకెలు)',kn:'OTP (6 ಅಂಕಿ)',ml:'OTP (6 അക്കം)',hi:'OTP (6 अंक)'},
+  enterBtn:{en:'Enter Assessment →',ta:'மதிப்பீட்டில் நுழை →',te:'మదింపులోకి ప్రవేశించు →',kn:'ಮೌಲ್ಯಮಾಪನಕ್ಕೆ ಪ್ರವೇಶಿಸಿ →',ml:'വിലയിരുത്തലിലേക്ക് പ്രവേശിക്കുക →',hi:'मूल्यांकन में प्रवेश करें →'},
+  staffHelp:{en:'Enter your registered mobile number and the OTP shared by your L&D team.',ta:'உங்கள் பதிவு செய்யப்பட்ட கைபேசி எண்ணையும், L&D குழுவால் வழங்கப்பட்ட OTP-ஐயும் உள்ளிடவும்.',te:'మీ నమోదిత మొబైల్ నంబర్ మరియు L&D టీమ్ పంపిన OTPని నమోదు చేయండి.',kn:'ನಿಮ್ಮ ನೋಂದಾಯಿತ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಮತ್ತು L&D ತಂಡದಿಂದ ಹಂಚಿಕೆಯಾದ OTP ನಮೂದಿಸಿ.',ml:'നിങ്ങളുടെ രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പറും L&D ടീം നൽകിയ OTPയും നൽകുക.',hi:'अपना पंजीकृत मोबाइल नंबर और L&D टीम द्वारा साझा किया गया OTP दर्ज करें।'},
+  noOtp:{en:"Don't have an OTP? Contact your L&D Manager.",ta:'OTP இல்லையா? உங்கள் L&D மேலாளரைத் தொடர்புகொள்ளவும்.',te:'OTP లేదా? మీ L&D మేనేజర్‌ని సంప్రదించండి.',kn:'OTP ಇಲ್ಲವೇ? ನಿಮ್ಮ L&D ಮ್ಯಾನೇಜರ್‌ನ್ನು ಸಂಪರ್ಕಿಸಿ.',ml:'OTP ഇല്ലേ? നിങ്ങളുടെ L&D മാനേജരെ ബന്ധപ്പെടുക.',hi:'OTP नहीं है? अपने L&D प्रबंधक से संपर्क करें।'},
+  assessTitle:{en:'DISC Personality Profile Assessment',ta:'DISC ஆளுமை விவர மதிப்பீடு',te:'DISC వ్యక్తిత్వ ప్రొఫైల్ మదింపు',kn:'DISC ವ್ಯಕ್ತಿತ್ವ ಪ್ರೊಫೈಲ್ ಮೌಲ್ಯಮಾಪನ',ml:'DISC വ്യക്തിത്വ പ്രൊഫൈൽ വിലയിരുത്തൽ',hi:'DISC व्यक्तित्व प्रोफ़ाइल मूल्यांकन'},
+  assessInstr:{en:'24 groups · Pick the word MOST like you and the word LEAST like you in each group.',ta:'24 குழுக்கள் · ஒவ்வொரு குழுவிலும் உங்களை MOST ஒத்த சொல்லையும், LEAST ஒத்த சொல்லையும் தேர்ந்தெடுக்கவும்.',te:'24 గ్రూపులు · ప్రతి గ్రూపులో మీకు MOST సరిపోయే మరియు LEAST సరిపోయే పదాన్ని ఎంచుకోండి.',kn:'24 ಗುಂಪುಗಳು · ಪ್ರತಿ ಗುಂಪಿನಲ್ಲಿ ನಿಮಗೆ MOST ಹೊಂದುವ ಮತ್ತು LEAST ಹೊಂದುವ ಪದವನ್ನು ಆಯ್ಕೆಮಾಡಿ.',ml:'24 ഗ്രൂപ്പുകൾ · ഓരോ ഗ്രൂപ്പിലും നിങ്ങളുമായി MOST യോജിക്കുന്നതും LEAST യോജിക്കുന്നതുമായ വാക്ക് തിരഞ്ഞെടുക്കുക.',hi:'24 समूह · प्रत्येक समूह में वह शब्द चुनें जो आप पर सबसे अधिक (MOST) लागू हो और जो सबसे कम (LEAST) लागू हो।'},
+  mostBtn:{en:'Most',ta:'அதிகம்',te:'ఎక్కువ',kn:'ಅತಿ',ml:'ഏറ്റവും',hi:'सबसे अधिक'},
+  leastBtn:{en:'Least',ta:'குறைந்த',te:'తక్కువ',kn:'ಕನಿಷ್ಠ',ml:'ഏറ്റവും കുറവ്',hi:'सबसे कम'},
+  qNum:{en:'Question',ta:'கேள்வி',te:'ప్రశ్న',kn:'ಪ್ರಶ್ನೆ',ml:'ചോദ്യം',hi:'प्रश्न'},
+  qOf:{en:'of',ta:'/',te:'/',kn:'/',ml:'/',hi:'/'},
+  progress:{en:'Progress',ta:'முன்னேற்றம்',te:'పురోగతి',kn:'ಪ್ರಗತಿ',ml:'പുരോഗതി',hi:'प्रगति'},
+  clear:{en:'Clear responses',ta:'பதில்களை அழி',te:'సమాధానాలు క్లియర్ చేయి',kn:'ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ಅಳಿಸಿ',ml:'പ്രതികരണങ്ങൾ മായ്ക്കുക',hi:'उत्तर साफ़ करें'},
+  submit:{en:'Submit Assessment →',ta:'மதிப்பீட்டை சமர்ப்பி →',te:'మదింపు సమర్పించు →',kn:'ಮೌಲ್ಯಮಾಪನ ಸಲ್ಲಿಸಿ →',ml:'വിലയിരുത്തൽ സമർപ്പിക്കുക →',hi:'मूल्यांकन जमा करें →'},
+  instrChoose:{en:'Select the word that is MOST like you and the one that is LEAST like you.',ta:'உங்களை அதிகம் ஒத்த சொல்லையும், உங்களை குறைந்தளவு ஒத்த சொல்லையும் தேர்ந்தெடுக்கவும்.',te:'మీకు ఎక్కువగా సరిపోయే మరియు తక్కువగా సరిపోయే పదాన్ని ఎంచుకోండి.',kn:'ನಿಮಗೆ ಅತಿ ಹೊಂದುವ ಮತ್ತು ಕನಿಷ್ಠ ಹೊಂದುವ ಪದವನ್ನು ಆಯ್ಕೆಮಾಡಿ.',ml:'നിങ്ങളുമായി ഏറ്റവും യോജിക്കുന്നതും ഏറ്റവും കുറവ് യോജിക്കുന്നതുമായ വാക്ക് തിരഞ്ഞെടുക്കുക.',hi:'वह शब्द चुनें जो आप पर सबसे अधिक और जो सबसे कम लागू हो।'}
+};
+ 
+function tr(key,lang){lang=lang||currentLang;return (UI[key]&&UI[key][lang])||UI[key]?.en||key}
+function trAdj(word,lang){lang=lang||currentLang;if(lang==='en') return word;return (T[word]&&T[word][lang])||word}
+ 
+let currentLang='en';
+function setLang(code){
+  currentLang=code;
+  document.body.className='lang-'+code;
+  // update login UI
+  const el=id=>document.getElementById(id);
+  if(el('loginTag')) el('loginTag').textContent=tr('signIn',code);
+  if(el('ltStaff')) el('ltStaff').textContent=tr('staffTab',code);
+  if(el('ltAdmin')) el('ltAdmin').textContent=tr('adminTab',code);
+  if(el('lblMobile')) el('lblMobile').textContent=tr('mobile',code);
+  if(el('lblOtp')) el('lblOtp').textContent=tr('otp',code);
+  if(el('btnEnterAssess')) el('btnEnterAssess').textContent=tr('enterBtn',code);
+  if(el('staffLoginHelp')) el('staffLoginHelp').textContent=tr('staffHelp',code);
+  if(el('noOtpHelp')) el('noOtpHelp').textContent=tr('noOtp',code);
+  // update active pill
+  document.querySelectorAll('.lang-pill').forEach(p=>p.classList.toggle('active',p.dataset.lang===code));
+  // re-render assessment if active
+  if(document.getElementById('panel-assess').classList.contains('active') && activeAssess){
+    renderAssessment();
+    applyAssessTranslations();
+  }
+}
+function applyAssessTranslations(){
+  const el=id=>document.getElementById(id);
+  if(el('assessHeading')) el('assessHeading').textContent=tr('assessTitle');
+  if(el('assessInstruction')) el('assessInstruction').innerHTML=tr('assessInstr').replace('MOST','<strong>MOST</strong>').replace('LEAST','<strong>LEAST</strong>');
+  if(el('progressLbl')) el('progressLbl').textContent=tr('progress');
+  if(el('btnClear')) el('btnClear').textContent=tr('clear');
+  if(el('btnSubmit')) el('btnSubmit').textContent=tr('submit');
+}
+ 
+/* ---------- Seed 20 sample profiles ---------- */
+const SEED_PROFILES = [
+  {name:'Priya Subramanian',mobile:'9000000001',role:'Senior Sales Associate',showroom:'T. Nagar — ROTN',dept:'Sales Floor',D:62,I:78,S:58,C:45},
+  {name:'Arun Kumar M',mobile:'9000000002',role:'Appraiser / JPP Executive',showroom:'Velachery — Chennai',dept:'Appraisal / JPP',D:38,I:32,S:62,C:82},
+  {name:'Lakshmi Narayanan',mobile:'9000000003',role:'Floor Manager',showroom:'Anna Nagar — Chennai',dept:'Leadership',D:78,I:68,S:42,C:55},
+  {name:'Deepa Ramachandran',mobile:'9000000004',role:'Customer Experience Host',showroom:'Coimbatore — ROTN',dept:'Customer Experience',D:35,I:58,S:75,C:48},
+  {name:'Karthikeyan S',mobile:'9000000005',role:'Cashier',showroom:'T. Nagar — ROTN',dept:'Cashiering',D:32,I:38,S:62,C:78},
+  {name:'Meena Krishnan',mobile:'9000000006',role:'Diamond Counter Specialist',showroom:'Adyar — Chennai',dept:'Sales Floor',D:55,I:72,S:52,C:68},
+  {name:'Rajesh Venkat',mobile:'9000000007',role:'Back Office Executive',showroom:'Vijayawada — AP/T',dept:'Back Office',D:42,I:30,S:58,C:85},
+  {name:'Anitha Ramesh',mobile:'9000000008',role:'L&D Manager',showroom:'Bangalore — Karnataka',dept:'L&D',D:52,I:82,S:65,C:50},
+  {name:'Ganesh Iyer',mobile:'9000000009',role:'Sales Floor Associate',showroom:'Madurai — ROTN',dept:'Sales Floor',D:48,I:75,S:55,C:40},
+  {name:'Revathi Suresh',mobile:'9000000010',role:'Senior Appraiser',showroom:'Kochi — Kerala',dept:'Appraisal / JPP',D:35,I:38,S:70,C:80},
+  {name:'Suresh Babu',mobile:'9000000011',role:'Operations Manager',showroom:'Hyderabad — AP/T',dept:'Operations',D:72,I:55,S:48,C:72},
+  {name:'Kavitha Raman',mobile:'9000000012',role:'Customer Experience Lead',showroom:'Salem — ROTN',dept:'Customer Experience',D:42,I:70,S:72,C:52},
+  {name:'Vijay Anand',mobile:'9000000013',role:'Security Supervisor',showroom:'T. Nagar — ROTN',dept:'Security',D:68,I:32,S:60,C:65},
+  {name:'Ramya Balaji',mobile:'9000000014',role:'Junior Sales Associate',showroom:'Trichy — ROTN',dept:'Sales Floor',D:45,I:68,S:62,C:45},
+  {name:'Murugan P',mobile:'9000000015',role:'Senior Cashier',showroom:'Pondicherry — ROTN',dept:'Cashiering',D:30,I:35,S:68,C:82},
+  {name:'Sangeetha Devi',mobile:'9000000016',role:'Sales Floor Associate',showroom:'Mysore — Karnataka',dept:'Sales Floor',D:52,I:80,S:50,C:42},
+  {name:'Ravi Shankar',mobile:'9000000017',role:'Floor Manager',showroom:'Erode — ROTN',dept:'Leadership',D:75,I:62,S:45,C:58},
+  {name:'Divya Prakash',mobile:'9000000018',role:'Diamond Specialist',showroom:'Chennai — Mylapore',dept:'Sales Floor',D:58,I:70,S:48,C:72},
+  {name:'Bhaskar Naidu',mobile:'9000000019',role:'Warehouse Executive',showroom:'Vizag — AP/T',dept:'Back Office',D:40,I:28,S:65,C:80},
+  {name:'Sumathi Rao',mobile:'9000000020',role:'HOD — Sales',showroom:'Chennai — HO',dept:'Leadership',D:82,I:65,S:40,C:60}
+];
+ 
+/* ---------- DB bootstrap ---------- */
+function freshDB(){
+  return {
+    staff:[], jds:[], jobProfiles:[], registry:[],
+    settings:{org:'L&D',sender:'L&D Team',expiryHours:24,adminHash:hashPw('disc-admin'),seeded:false}
+  };
+}
+let DB = loadDB();
+ensureSeed();
+ 
+function loadDB(){
+  try{const raw=localStorage.getItem(STORE_KEY);if(raw){const d=JSON.parse(raw);if(!d.registry)d.registry=[];if(!d.settings)d.settings=freshDB().settings;return d;}}catch(e){}
+  return freshDB();
+}
+function saveDB(){try{localStorage.setItem(STORE_KEY,JSON.stringify(DB))}catch(e){toast('Storage error.')}}
+function hashPw(s){let h=5381;for(let i=0;i<s.length;i++){h=((h<<5)+h)+s.charCodeAt(i);h|=0}return 'h_'+(h>>>0).toString(16)}
+ 
+function ensureSeed(){
+  if(DB.settings.seeded) return;
+  SEED_PROFILES.forEach((p,i)=>{
+    const sorted=Object.entries({D:p.D,I:p.I,S:p.S,C:p.C}).sort((a,b)=>b[1]-a[1]);
+    DB.staff.push({
+      id:'seed_'+i,
+      name:p.name, mobile:p.mobile, empId:'GRT-'+(100+i).toString(),
+      role:p.role, showroom:p.showroom, dept:p.dept,
+      D:p.D,I:p.I,S:p.S,C:p.C,
+      // Generate plausible PPA tallies from the DISC scores
+      ppa: derivePpaFromScores(p.D,p.I,p.S,p.C),
+      primary:sorted[0][0], secondary:sorted[1][0],
+      source:'seed', isSeed:true,
+      date:new Date(Date.now()-(Math.random()*30*86400000)).toISOString()
+    });
+  });
+  DB.settings.seeded=true;
+  saveDB();
+}
+function derivePpaFromScores(D,I,S,C){
+  // Reverse-engineer plausible Most/Least tallies from 0-100 DISC norms
+  // Each graph sums to approximately 24 (48 picks split across graphs)
+  const scale = v => Math.max(0, Math.min(14, Math.round((v-40)/4)+4));
+  const mask = {D:scale(D),I:scale(I),S:scale(S),C:scale(C)};
+  // under-pressure tends to amplify dominant/low dimensions
+  const pressure = {D:scale(D-5+Math.random()*10),I:scale(I-5+Math.random()*10),S:scale(S-5+Math.random()*10),C:scale(C-5+Math.random()*10)};
+  const self = {D:mask.D-pressure.D,I:mask.I-pressure.I,S:mask.S-pressure.S,C:mask.C-pressure.C};
+  return {mask,pressure,self};
+}
+function reloadSeed(){
+  DB.staff=DB.staff.filter(s=>!s.isSeed);
+  DB.settings.seeded=false;
+  saveDB(); ensureSeed(); renderDashboard(); renderStaffList();
+  toast('Seed profiles restored.');
+}
+function removeSeed(){
+  if(!confirm('Remove all 20 seed profiles?')) return;
+  DB.staff=DB.staff.filter(s=>!s.isSeed);
+  DB.settings.seeded=true;
+  saveDB(); renderDashboard(); renderStaffList();
+  toast('Seed removed.');
+}
+ 
+/* ---------- Session & routing ---------- */
+let session={role:null};
+let activeAssess=null;
+let responses={};
+let assessLang='en';
+ 
+function showLogin(){document.getElementById('loginView').style.display='flex';document.getElementById('mainApp').style.display='none'}
+function showApp(){document.getElementById('loginView').style.display='none';document.getElementById('mainApp').style.display='block'}
+function switchLoginTab(w){
+  document.querySelectorAll('.login-tabs button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.login-tabs button')[w==='staff'?0:1].classList.add('active');
+  document.getElementById('loginStaff').classList.toggle('active',w==='staff');
+  document.getElementById('loginAdmin').classList.toggle('active',w==='admin');
+}
+ 
+function staffLogin(){
+  DB=loadDB();
+  const mRaw=(document.getElementById('staffMobile').value||'').trim();
+  const oRaw=(document.getElementById('staffOtp').value||'').trim();
+  const mobile=mRaw.replace(/\D/g,'').slice(-10);
+  const otp=oRaw.replace(/\D/g,'');
+  if(mobile.length!==10){toast('Please enter a valid 10-digit mobile number.');return}
+  if(otp.length!==6){toast('Please enter the 6-digit OTP.');return}
+  const rec=DB.registry.find(r=>String(r.mobile).replace(/\D/g,'').slice(-10)===mobile);
+  if(!rec){toast('This mobile is not registered. Ask L&D to register you.');return}
+  if(rec.status==='done'){toast('Assessment already completed. Contact L&D for re-assessment.');return}
+  if(!rec.otp){toast('No OTP on file. Ask L&D to generate one.');return}
+  if(String(rec.otp).trim()!==otp){toast('Incorrect OTP. Check the code shared by L&D.');return}
+  if(Date.now()>rec.otpExpiry){rec.status='expired';saveDB();toast('OTP expired. Ask L&D for a new one.');return}
+  session={role:'staff',mobile:rec.mobile,name:rec.name,recId:rec.id};
+  assessLang=currentLang;
+  activeAssess={recId:rec.id,adhoc:null};
+  showApp(); configureForRole(); switchTab('assess');
+  toast('Welcome, '+rec.name);
+}
+function adminLogin(){
+  DB=loadDB();
+  const pw=document.getElementById('adminPass').value;
+  if(hashPw(pw)!==DB.settings.adminHash){toast('Incorrect password.');return}
+  session={role:'admin',name:'Admin'};
+  activeAssess=null;
+  showApp(); configureForRole(); switchTab('dashboard');
+}
+function logout(){
+  session={role:null}; activeAssess=null; responses={};
+  ['staffMobile','staffOtp','adminPass'].forEach(i=>document.getElementById(i).value='');
+  showLogin();
+}
+ 
+function configureForRole(){
+  const isAdmin=session.role==='admin';
+  document.getElementById('roleBadge').textContent=isAdmin?'Admin':'Staff';
+  document.getElementById('roleBadge').className='role-badge '+(isAdmin?'':'staff');
+  document.getElementById('userLabel').textContent=isAdmin?'':session.name;
+  document.getElementById('btnExport').style.display=isAdmin?'':'none';
+  document.getElementById('btnImport').style.display=isAdmin?'':'none';
+  document.querySelectorAll('#tabBar .tab').forEach(t=>{
+    const role=t.dataset.role;
+    const show=role==='both'||(role==='admin'&&isAdmin)||(role==='staff'&&!isAdmin);
+    t.style.display=show?'':'none';
+  });
+  if(!isAdmin){
+    showAssessmentForm();
+    const rec=DB.registry.find(r=>r.id===session.recId);
+    if(rec) document.getElementById('assessWho').textContent=`${rec.name} · ${rec.role||'—'} · ${rec.showroom||'—'}`;
+    document.getElementById('topSub').textContent='Complete the 24-question DISC assessment.';
+  } else {
+    document.getElementById('topSub').textContent='Assess · Upload · Compare · Decide';
+    renderDashboard();
+  }
+}
+ 
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2800)}
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+name));
+  if(name==='dashboard') renderDashboard();
+  if(name==='registry'){renderRegistry();renderRegStats()}
+  if(name==='staff') renderStaffList();
+  if(name==='jobanalysis') refreshJDSelect();
+  if(name==='compare') refreshCompareSelects();
+  if(name==='settings') loadSettingsInto();
+  if(name==='assess') prepAssessmentPanel();
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+function openModal(h){document.getElementById('modalContent').innerHTML='<span class="close" onclick="closeModal()">×</span>'+h;document.getElementById('modalBg').classList.add('show')}
+function closeModal(){document.getElementById('modalBg').classList.remove('show')}
+ 
+/* ---------- Assessment panel routing ---------- */
+function prepAssessmentPanel(){
+  const isAdmin=session.role==='admin';
+  if(isAdmin){
+    if(activeAssess) showAssessmentForm();
+    else showAssessmentPicker();
+  } else showAssessmentForm();
+}
+function showAssessmentPicker(){
+  document.getElementById('adminAssessPicker').style.display='';
+  document.getElementById('assessHeaderBox').style.display='none';
+  document.getElementById('questionsContainer').innerHTML='';
+  document.getElementById('assessFooter').style.display='none';
+  populateAssessPicker();
+  populateLangDropdown();
+}
+function showAssessmentForm(){
+  document.getElementById('adminAssessPicker').style.display=session.role==='admin'?'':'none';
+  document.getElementById('assessHeaderBox').style.display='';
+  document.getElementById('assessFooter').style.display='flex';
+  renderAssessment();
+  applyAssessTranslations();
+}
+function populateAssessPicker(){
+  const pending=DB.registry.filter(r=>computeStatus(r)!=='done');
+  const completed=DB.registry.filter(r=>computeStatus(r)==='done');
+  document.getElementById('adminAssessPick').innerHTML=`<option value="">— Choose someone —</option>
+    <option value="_adhoc">➕ Ad-hoc (not in registry)</option>
+    ${pending.length?'<optgroup label="Pending / not assessed">':''}
+    ${pending.map(r=>`<option value="${r.id}">${escapeHtml(r.name)} · +91 ${r.mobile} · ${escapeHtml(r.role||'—')}</option>`).join('')}
+    ${pending.length?'</optgroup>':''}
+    ${completed.length?'<optgroup label="Already completed (re-assess)">':''}
+    ${completed.map(r=>`<option value="${r.id}">${escapeHtml(r.name)} · +91 ${r.mobile} ✓</option>`).join('')}
+    ${completed.length?'</optgroup>':''}`;
+}
+function populateLangDropdown(){
+  const s=document.getElementById('adminAssessLang');
+  s.innerHTML=LANGS.map(l=>`<option value="${l.code}">${l.name}</option>`).join('');
+  s.value=currentLang;
+}
+function adminPickStaffChange(){
+  const v=document.getElementById('adminAssessPick').value;
+  const show=v==='_adhoc';
+  ['adhocNameField','adhocMobField','adhocRoleField','adhocShowField'].forEach(id=>document.getElementById(id).style.display=show?'':'none');
+}
+function adminBeginAssessment(){
+  const v=document.getElementById('adminAssessPick').value;
+  if(!v){toast('Pick a staff member or ad-hoc.');return}
+  assessLang=document.getElementById('adminAssessLang').value||'en';
+  setLang(assessLang);
+  if(v==='_adhoc'){
+    const name=document.getElementById('adhocName').value.trim();
+    if(!name){toast('Enter a name for ad-hoc.');return}
+    activeAssess={recId:null,adhoc:{name,mobile:document.getElementById('adhocMob').value.trim(),role:document.getElementById('adhocRole').value.trim(),showroom:document.getElementById('adhocShow').value.trim()}};
+    document.getElementById('assessWho').textContent=`${activeAssess.adhoc.name} · (ad-hoc)`;
+  } else {
+    const rec=DB.registry.find(r=>r.id===v);
+    if(!rec){toast('Record not found.');return}
+    activeAssess={recId:rec.id,adhoc:null};
+    document.getElementById('assessWho').textContent=`${rec.name} · ${rec.role||'—'} · +91 ${rec.mobile}`;
+  }
+  responses={};
+  showAssessmentForm();
+}
+function adminStartAssessment(recId){
+  switchTab('assess');
+  setTimeout(()=>{
+    document.getElementById('adminAssessPick').value=recId;
+    adminPickStaffChange();
+    adminBeginAssessment();
+  },80);
+}
+ 
+/* ---------- Registry ---------- */
+function genOTP(){return String(Math.floor(100000+Math.random()*900000))}
+function registerStaff(){
+  const name=document.getElementById('regName').value.trim();
+  const mobile=document.getElementById('regMobile').value.trim().replace(/\D/g,'').slice(-10);
+  if(!name){toast('Enter name.');return}
+  if(mobile.length!==10){toast('Enter 10-digit mobile.');return}
+  const exists=DB.registry.find(r=>String(r.mobile).replace(/\D/g,'').slice(-10)===mobile);
+  if(exists){
+    if(!confirm(`Mobile ${mobile} already exists for ${exists.name}. Regenerate OTP?`)) return;
+    exists.otp=genOTP();exists.otpExpiry=Date.now()+DB.settings.expiryHours*3600*1000;exists.status='pending';
+    saveDB();renderRegistry();renderRegStats();showOtpCard(exists);return;
+  }
+  const rec={id:'r_'+Date.now(),name,mobile,
+    empId:document.getElementById('regEmp').value.trim(),
+    role:document.getElementById('regRole').value.trim(),
+    showroom:document.getElementById('regShow').value.trim(),
+    dept:document.getElementById('regDept').value,
+    otp:genOTP(),otpExpiry:Date.now()+DB.settings.expiryHours*3600*1000,
+    status:'pending',createdAt:Date.now()};
+  DB.registry.push(rec);saveDB();
+  ['regName','regMobile','regEmp','regRole','regShow'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('regDept').value='';
+  renderRegistry();renderRegStats();showOtpCard(rec);
+}
+function showOtpCard(rec){
+  const exp=new Date(rec.otpExpiry);const msg=waMessage(rec);
+  openModal(`<h2>OTP for ${escapeHtml(rec.name)}</h2>
+    <div class="subtle">${escapeHtml(rec.role||'—')} · ${escapeHtml(rec.showroom||'—')} · +91 ${rec.mobile}</div>
+    <div class="otp-display"><div class="lbl">One-time password</div><div class="code">${rec.otp}</div><div class="expiry">Valid until ${exp.toLocaleString()}</div></div>
+    <div class="rule"></div>
+    <div style="background:var(--cream);border:1px solid var(--rule);border-radius:8px;padding:12px;font-size:13px;white-space:pre-wrap;font-family:monospace">${escapeHtml(msg)}</div>
+    <div class="btn-row" style="margin-top:14px">
+      <a class="btn wa" target="_blank" href="https://wa.me/91${rec.mobile}?text=${encodeURIComponent(msg)}">📱 WhatsApp</a>
+      <button class="btn" onclick="copyText(${JSON.stringify(msg).replace(/"/g,'&quot;')})">📋 Copy message</button>
+      <button class="btn" onclick="copyText('${rec.otp}')">Copy OTP</button>
+      <a class="btn" href="sms:+91${rec.mobile}?body=${encodeURIComponent(msg)}">💬 SMS</a>
+    </div>
+    <div style="margin-top:16px;text-align:right"><button class="btn primary" onclick="closeModal()">Done</button></div>`);
+}
+function waMessage(rec){
+  return `Hello ${rec.name},\n\nYour DISC assessment login:\n\nMobile: ${rec.mobile}\nOTP: ${rec.otp}\n\nValid for ${DB.settings.expiryHours} hours. Takes ~12 minutes.\n\n— ${DB.settings.sender||DB.settings.org}`;
+}
+function copyText(s){navigator.clipboard.writeText(s).then(()=>toast('Copied.'),()=>toast('Copy failed.'))}
+function renderRegistry(){
+  const tbody=document.getElementById('regTbody');if(!tbody)return;
+  const q=(document.getElementById('regSearch').value||'').toLowerCase();
+  const f=document.getElementById('regFilter').value;
+  let list=DB.registry.slice().sort((a,b)=>b.createdAt-a.createdAt);
+  if(q) list=list.filter(r=>((r.name||'')+(r.mobile||'')+(r.role||'')+(r.showroom||'')).toLowerCase().includes(q));
+  if(f) list=list.filter(r=>computeStatus(r)===f);
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="8" class="empty-state">No staff registered yet.</td></tr>`;return}
+  tbody.innerHTML=list.map(r=>{
+    const status=computeStatus(r);
+    const sc=status==='pending'?'status-pending':status==='done'?'status-done':'status-expired';
+    const expStr=r.otpExpiry?new Date(r.otpExpiry).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'}):'—';
+    return `<tr><td><strong>${escapeHtml(r.name)}</strong>${r.empId?`<br><span class="subtle">${escapeHtml(r.empId)}</span>`:''}</td>
+      <td>+91 ${r.mobile}</td><td>${escapeHtml(r.role||'—')}</td><td>${escapeHtml(r.showroom||'—')}</td>
+      <td><code style="font-size:13px;letter-spacing:.1em">${status==='done'?'✓ used':r.otp||'—'}</code></td>
+      <td><span class="status-chip ${sc}">${status}</span></td>
+      <td class="subtle" style="font-size:12px">${status==='done'?'—':expStr}</td>
+      <td>
+        <button class="btn sm gold" onclick="adminStartAssessment('${r.id}')">▶ Assess</button>
+        <button class="btn sm" onclick="viewOtp('${r.id}')">View OTP</button>
+        <button class="btn sm" onclick="regenOtp('${r.id}')">↻ New</button>
+        <button class="btn sm danger" onclick="delRegistry('${r.id}')">×</button>
+      </td></tr>`;
+  }).join('');
+}
+function computeStatus(r){if(r.status==='done')return 'done';if(Date.now()>r.otpExpiry)return 'expired';return 'pending'}
+function viewOtp(id){const r=DB.registry.find(x=>x.id===id);if(r)showOtpCard(r)}
+function regenOtp(id){const r=DB.registry.find(x=>x.id===id);if(!r)return;r.otp=genOTP();r.otpExpiry=Date.now()+DB.settings.expiryHours*3600*1000;r.status='pending';saveDB();renderRegistry();renderRegStats();showOtpCard(r)}
+function delRegistry(id){if(!confirm('Remove from registry?'))return;DB.registry=DB.registry.filter(x=>x.id!==id);saveDB();renderRegistry();renderRegStats()}
+function renderRegStats(){
+  const el=document.getElementById('regStats');if(!el)return;
+  const tot=DB.registry.length;
+  const done=DB.registry.filter(r=>r.status==='done').length;
+  const pending=DB.registry.filter(r=>computeStatus(r)==='pending').length;
+  const expired=DB.registry.filter(r=>computeStatus(r)==='expired').length;
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+    <div class="card tight" style="margin:0;background:var(--cream)"><div class="subtle">Registered</div><div style="font-family:Fraunces,serif;font-size:1.6rem">${tot}</div></div>
+    <div class="card tight" style="margin:0;background:#e6f1ea"><div class="subtle">Completed</div><div style="font-family:Fraunces,serif;font-size:1.6rem;color:var(--ste)">${done}</div></div>
+    <div class="card tight" style="margin:0;background:#fdf3db"><div class="subtle">Pending</div><div style="font-family:Fraunces,serif;font-size:1.6rem;color:var(--gold-deep)">${pending}</div></div>
+    <div class="card tight" style="margin:0;background:#fbeeec"><div class="subtle">Expired</div><div style="font-family:Fraunces,serif;font-size:1.6rem;color:var(--dom)">${expired}</div></div>
+  </div>`;
+}
+function bulkRegisterOpen(){
+  openModal(`<h2>Bulk register</h2><p class="subtle">CSV columns: name,mobile,role,showroom,dept,empId</p>
+    <textarea id="bulkCsv" rows="10" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--rule);border-radius:6px;font-family:monospace;font-size:12.5px" placeholder="name,mobile,role,showroom"></textarea>
+    <div class="btn-row" style="margin-top:14px;justify-content:flex-end">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn gold" onclick="bulkRegisterDo()">Register all</button>
+    </div>`);
+}
+function bulkRegisterDo(){
+  const csv=document.getElementById('bulkCsv').value.trim();if(!csv){toast('Paste CSV.');return}
+  const lines=csv.split(/\r?\n/).filter(l=>l.trim());
+  const headers=lines[0].split(',').map(h=>h.trim().toLowerCase());
+  const col=n=>headers.indexOf(n);
+  if(col('name')<0||col('mobile')<0){toast('Need name + mobile columns.');return}
+  let added=0,skip=0;
+  for(let i=1;i<lines.length;i++){
+    const p=lines[i].split(',').map(x=>x.trim());
+    const mobile=(p[col('mobile')]||'').replace(/\D/g,'').slice(-10);
+    const name=p[col('name')];
+    if(!name||mobile.length!==10){skip++;continue}
+    if(DB.registry.find(r=>r.mobile===mobile)){skip++;continue}
+    DB.registry.push({id:'r_'+Date.now()+'_'+i,name,mobile,
+      empId:col('empid')>=0?p[col('empid')]||'':'',role:col('role')>=0?p[col('role')]||'':'',
+      showroom:col('showroom')>=0?p[col('showroom')]||'':'',dept:col('dept')>=0?p[col('dept')]||'':'',
+      otp:genOTP(),otpExpiry:Date.now()+DB.settings.expiryHours*3600*1000,status:'pending',createdAt:Date.now()});
+    added++;
+  }
+  saveDB();closeModal();renderRegistry();renderRegStats();toast(`Added ${added}, skipped ${skip}.`);
+}
+ 
+/* ---------- Assessment ---------- */
+function renderAssessment(){
+  const c=document.getElementById('questionsContainer');if(!c)return;
+  const lang=assessLang||currentLang;
+  c.innerHTML=QUESTIONS_EN.map((q,i)=>{
+    const words=q.map(p=>{const[w,d]=p.split('|');return{w,d,tr:trAdj(w,lang)}});
+    return `<div class="q-block">
+      <h4>${tr('qNum',lang)} ${i+1} ${tr('qOf',lang)} 24</h4>
+      <div class="q-instruction">${tr('instrChoose',lang)}</div>
+      ${words.map(({w,d,tr:tw})=>`<div class="adj-group">
+        <div class="adj-word">${tw}</div>
+        <button class="adj-btn most" data-q="${i}" data-dim="${d}" data-type="most" onclick="pick(${i},'${d}','most')">${tr('mostBtn',lang)}</button>
+        <button class="adj-btn least" data-q="${i}" data-dim="${d}" data-type="least" onclick="pick(${i},'${d}','least')">${tr('leastBtn',lang)}</button>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+  updateProgress();
+}
+function pick(q,dim,type){
+  if(!responses[q]) responses[q]={};
+  if(responses[q][type]===dim){delete responses[q][type]}
+  else {
+    if(responses[q][type==='most'?'least':'most']===dim) delete responses[q][type==='most'?'least':'most'];
+    responses[q][type]=dim;
+  }
+  document.querySelectorAll(`.adj-btn[data-q="${q}"]`).forEach(b=>{
+    b.classList.toggle('selected',responses[q]?.[b.dataset.type]===b.dataset.dim);
+  });
+  updateProgress();
+}
+function updateProgress(){
+  let done=0;for(let i=0;i<QUESTIONS_EN.length;i++) if(responses[i]?.most&&responses[i]?.least) done++;
+  const pct=Math.round(done/QUESTIONS_EN.length*100);
+  const f=document.getElementById('progressFill');if(f) f.style.width=pct+'%';
+  const t=document.getElementById('progressText');if(t) t.textContent=`${done} / 24`;
+}
+function clearAssessment(){if(!confirm('Clear all responses?'))return;responses={};renderAssessment();toast('Cleared.')}
+ 
+/* PPA-style scoring:
+   Graph I (Work Mask) = counts of MOST by dimension
+   Graph II (Under Pressure) = counts of LEAST by dimension
+   Graph III (Self-Image) = Most − Least per dimension (can be negative)
+   DISC norm 0-100 derived from Graph III. */
+function computeDISC(){
+  const mask={D:0,I:0,S:0,C:0};
+  const pressure={D:0,I:0,S:0,C:0};
+  for(let i=0;i<QUESTIONS_EN.length;i++){
+    const r=responses[i];
+    if(r?.most) mask[r.most]+=1;
+    if(r?.least) pressure[r.least]+=1;
+  }
+  const self={};
+  for(const k of ['D','I','S','C']) self[k]=mask[k]-pressure[k];
+  const norm={};
+  for(const k of ['D','I','S','C']) norm[k]=Math.round(((self[k]+24)/48)*100);
+  return {mask,pressure,self,norm};
+}
+function submitAssessment(){
+  if(!activeAssess){toast('No active assessment.');return}
+  let done=0;for(let i=0;i<QUESTIONS_EN.length;i++) if(responses[i]?.most&&responses[i]?.least) done++;
+  if(done<QUESTIONS_EN.length && !confirm(`Only ${done}/24 complete. Submit anyway?`)) return;
+  const {mask,pressure,self,norm}=computeDISC();
+  const sorted=Object.entries(norm).sort((a,b)=>b[1]-a[1]);
+  let ident;
+  if(activeAssess.recId){
+    const rec=DB.registry.find(r=>r.id===activeAssess.recId);
+    if(!rec){toast('Record missing.');return}
+    ident={regId:rec.id,name:rec.name,mobile:rec.mobile,empId:rec.empId,role:rec.role,showroom:rec.showroom,dept:rec.dept};
+    rec.status='done';rec.completedAt=Date.now();
+  } else if(activeAssess.adhoc){
+    ident={regId:null,name:activeAssess.adhoc.name,mobile:activeAssess.adhoc.mobile||'',empId:'',role:activeAssess.adhoc.role||'',showroom:activeAssess.adhoc.showroom||'',dept:''};
+  } else {toast('Could not resolve assessee.');return}
+  const profile={id:'p_'+Date.now(),...ident,
+    D:norm.D,I:norm.I,S:norm.S,C:norm.C,
+    ppa:{mask,pressure,self},
+    primary:sorted[0][0],secondary:sorted[1][0],
+    source:session.role==='admin'?'admin-supervised':'assessment',
+    lang:assessLang,date:new Date().toISOString()};
+  DB.staff.push(profile);saveDB();
+  showProfileResult(profile,session.role==='staff');
+  responses={};activeAssess=null;
+  if(session.role==='admin') setTimeout(()=>showAssessmentPicker(),100);
+}
+ 
+/* ---------- PPA 3-graph SVG renderer (Thomas-style) ---------- */
+function renderPpaGraph(containerId, tallies, title, maxVal, allowNegative){
+  // tallies = {D,I,S,C} integer counts. For Self-Image, allowNegative=true (range -12..+12)
+  // For Mask / Pressure, range 0..24 (typical)
+  const dims=['D','I','S','C'];
+  const W=280, H=320, padX=30, padTop=30, padBot=40;
+  const innerH=H-padTop-padBot;
+  const colW=(W-padX*2)/4;
+  const lo = allowNegative ? -12 : 0;
+  const hi = allowNegative ? 12 : 24;
+  const range=hi-lo;
+  // band positions: green bands = zones (upper/lower). For visual simplicity 3 bands.
+  const yAt=v=>padTop + ((hi-v)/range)*innerH;
+  // Build svg
+  let svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  // Background alternating horizontal bands (light green)
+  const bandCount = allowNegative ? 5 : 4;
+  for(let b=0;b<bandCount;b++){
+    const y1=padTop+(innerH*b/bandCount);
+    const y2=padTop+(innerH*(b+1)/bandCount);
+    const fill = (b%2===0) ? '#d8ecb9' : '#ffffff';
+    svg+=`<rect x="${padX}" y="${y1}" width="${W-padX*2}" height="${y2-y1}" fill="${fill}" stroke="#a8d179" stroke-width="1"/>`;
+  }
+  // Outer border
+  svg+=`<rect x="${padX}" y="${padTop}" width="${W-padX*2}" height="${innerH}" fill="none" stroke="#7fa85f" stroke-width="1.5"/>`;
+  // Vertical column separators + labels
+  dims.forEach((d,i)=>{
+    const x=padX+colW*i;
+    if(i>0) svg+=`<line x1="${x}" y1="${padTop}" x2="${x}" y2="${padTop+innerH}" stroke="#a8d179" stroke-width="1"/>`;
+    const cx=padX+colW*i+colW/2;
+    svg+=`<text x="${cx}" y="${padTop-10}" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="13" font-weight="600" fill="#1f1a14">${d}</text>`;
+  });
+  // Centerline if allowNegative (zero axis)
+  if(allowNegative){
+    const yZ=yAt(0);
+    svg+=`<line x1="${padX}" y1="${yZ}" x2="${W-padX}" y2="${yZ}" stroke="#7fa85f" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  }
+  // Plot points + connecting lines
+  const pts=dims.map((d,i)=>{
+    const cx=padX+colW*i+colW/2;
+    const v=Math.max(lo,Math.min(hi,tallies[d]||0));
+    const cy=yAt(v);
+    return {x:cx,y:cy,v,d};
+  });
+  // Connecting polyline
+  svg+=`<polyline points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="none" stroke="#2b4b7a" stroke-width="2"/>`;
+  // Points
+  pts.forEach(p=>{
+    svg+=`<circle cx="${p.x}" cy="${p.y}" r="6" fill="#2b4b7a" stroke="#fff" stroke-width="1.5"/>`;
+  });
+  // Bottom number labels
+  pts.forEach(p=>{
+    svg+=`<text x="${p.x}" y="${H-padBot+22}" text-anchor="middle" font-family="Inter Tight, sans-serif" font-size="13" font-weight="600" fill="#2b4b7a">${p.v}</text>`;
+  });
+  svg+='</svg>';
+  return svg;
+}
+function renderThreeGraphs(ppa){
+  const g1=renderPpaGraph(null,ppa.mask,'Work Mask',24,false);
+  const g2=renderPpaGraph(null,ppa.pressure,'Behaviour Under Pressure',24,false);
+  const g3=renderPpaGraph(null,ppa.self,'Self Image',12,true);
+  return `<div class="ppa-graph-row">
+    <div class="ppa-col">
+      <div class="ppa-num">I</div>
+      <div class="ppa-title">Work Mask</div>
+      <div class="ppa-svg-box">${g1}</div>
+    </div>
+    <div class="ppa-col">
+      <div class="ppa-num">II</div>
+      <div class="ppa-title">Behaviour Under Pressure</div>
+      <div class="ppa-svg-box">${g2}</div>
+    </div>
+    <div class="ppa-col">
+      <div class="ppa-num">III</div>
+      <div class="ppa-title">Self Image</div>
+      <div class="ppa-svg-box">${g3}</div>
+    </div>
+  </div>`;
+}
+function renderSinglePpaGraph(tallies, allowNegative, maxVal){
+  return `<div class="ppa-graph-single"><div class="ppa-svg-box">${renderPpaGraph(null,tallies,'',maxVal,allowNegative)}</div></div>`;
+}
+ 
+/* ---------- Result modal ---------- */
+function showProfileResult(p,staffView){
+  const pattern=getPatternName(p);
+  const strengths=getStrengths(p);
+  const watchouts=getWatchouts(p);
+  // Ensure PPA data exists (seed/upload profiles fall back to derived)
+  const ppa = p.ppa || derivePpaFromScores(p.D,p.I,p.S,p.C);
+  openModal(`
+    <h2>${staffView?'Thank you, ':''}${escapeHtml(p.name)}</h2>
+    <div class="subtle">${escapeHtml(p.role||'—')} · ${escapeHtml(p.showroom||'—')}</div>
+    <div class="rule"></div>
+    ${renderThreeGraphs(ppa)}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px" class="analysis-grid">
+      <div class="card tight" style="margin:0">
+        <h4 style="font-family:Fraunces,serif;font-size:1.3rem">${pattern}</h4>
+        <div class="subtle">Primary: <strong style="color:var(--${p.primary==='D'?'dom':p.primary==='I'?'inf':p.primary==='S'?'ste':'con'})">${p.primary}</strong> · Secondary: <strong>${p.secondary}</strong></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0">
+          <div style="padding:8px;border-radius:6px;text-align:center;color:#fff;background:var(--dom)"><div style="font-size:10px;letter-spacing:.1em">D</div><div style="font-size:1.3rem;font-weight:700;font-family:Fraunces,serif">${p.D}</div></div>
+          <div style="padding:8px;border-radius:6px;text-align:center;color:#fff;background:var(--inf)"><div style="font-size:10px;letter-spacing:.1em">I</div><div style="font-size:1.3rem;font-weight:700;font-family:Fraunces,serif">${p.I}</div></div>
+          <div style="padding:8px;border-radius:6px;text-align:center;color:#fff;background:var(--ste)"><div style="font-size:10px;letter-spacing:.1em">S</div><div style="font-size:1.3rem;font-weight:700;font-family:Fraunces,serif">${p.S}</div></div>
+          <div style="padding:8px;border-radius:6px;text-align:center;color:#fff;background:var(--con)"><div style="font-size:10px;letter-spacing:.1em">C</div><div style="font-size:1.3rem;font-weight:700;font-family:Fraunces,serif">${p.C}</div></div>
+        </div>
+      </div>
+      <div class="card tight" style="margin:0">
+        <p style="font-size:13px;line-height:1.6"><strong>Strengths:</strong> ${strengths}</p>
+        <p style="font-size:13px;margin-top:8px;line-height:1.6"><strong>Watch-outs:</strong> ${watchouts}</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+      ${staffView?'<button class="btn primary" onclick="closeModal();logout()">Close &amp; sign out</button>':'<button class="btn" onclick="window.print()">🖨 Print</button><button class="btn primary" onclick="closeModal()">Close</button>'}
+    </div>
+  `);
+}
+function getPatternName(p){
+  const top=[p.primary,p.secondary].join('');
+  const n={DI:'Persuader',ID:'Inspirational',DC:'Challenger',CD:'Perfectionist',DS:'Producer',SD:'Reliable Driver',IC:'Assessor',CI:'Diplomat',IS:'Counsellor',SI:'Harmoniser',SC:'Technician',CS:'Analyst'};
+  return n[top]||`${p.primary}-${p.secondary} blend`;
+}
+function getStrengths(p){const s=[];if(p.D>=60)s.push('decisive, results-focused');if(p.I>=60)s.push('engaging, persuasive');if(p.S>=60)s.push('dependable, team-oriented');if(p.C>=60)s.push('accurate, process-disciplined');return s.length?s.join('; '):'balanced across dimensions'}
+function getWatchouts(p){const w=[];if(p.D>=70)w.push('may be blunt or impatient');if(p.I>=70)w.push('may over-promise');if(p.S>=70)w.push('may resist change');if(p.C>=70)w.push('may over-analyse');if(p.D<=30)w.push('may defer decisions');if(p.I<=30)w.push('may seem reserved');if(p.S<=30)w.push('may appear restless');if(p.C<=30)w.push('may be loose with process');return w.length?w.join('; '):'no major red flags'}
+ 
+/* ---------- Staff list ---------- */
+function renderStaffList(){
+  const tbody=document.getElementById('staffTbody');if(!tbody)return;
+  const q=(document.getElementById('staffSearch').value||'').toLowerCase();
+  const f=document.getElementById('staffFilter').value;
+  const sr=document.getElementById('staffSource').value;
+  let list=DB.staff.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(q) list=list.filter(p=>((p.name||'')+(p.role||'')+(p.showroom||'')+(p.mobile||'')+(p.empId||'')).toLowerCase().includes(q));
+  if(f) list=list.filter(p=>p.primary===f);
+  if(sr) list=list.filter(p=>p.source===sr);
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="11" class="empty-state">No profiles.</td></tr>`;return}
+  tbody.innerHTML=list.map(p=>`<tr>
+    <td><strong>${escapeHtml(p.name)}</strong>${p.isSeed?' <span class="tag">seed</span>':p.source==='upload'?' <span class="tag">uploaded</span>':p.source==='admin-supervised'?' <span class="tag">supervised</span>':''}</td>
+    <td>${p.mobile?'+91 '+p.mobile:'—'}</td>
+    <td>${escapeHtml(p.role||'—')}</td>
+    <td>${escapeHtml(p.showroom||'—')}</td>
+    <td><span class="disc-badge disc-${p.primary}">${p.primary}</span> <span class="subtle">${getPatternName(p)}</span></td>
+    <td>${p.D}</td><td>${p.I}</td><td>${p.S}</td><td>${p.C}</td>
+    <td class="subtle">${new Date(p.date).toLocaleDateString()}</td>
+    <td><button class="btn sm" onclick="viewProfile('${p.id}')">View</button>
+    <button class="btn sm danger" onclick="deleteProfile('${p.id}')">×</button></td>
+  </tr>`).join('');
+}
+function viewProfile(id){const p=DB.staff.find(x=>x.id===id);if(p) showProfileResult(p,false)}
+function deleteProfile(id){if(!confirm('Delete profile?'))return;DB.staff=DB.staff.filter(x=>x.id!==id);saveDB();renderStaffList();renderDashboard();toast('Deleted.')}
+ 
+/* ---------- Uploads ---------- */
+function handleProfileFile(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    const text=r.result;
+    try{
+      if(file.name.endsWith('.json')){
+        const d=JSON.parse(text);const arr=Array.isArray(d)?d:[d];let added=0;
+        arr.forEach(x=>{if(!x.name)return;const D=clamp(+x.D||0),I=clamp(+x.I||0),S=clamp(+x.S||0),C=clamp(+x.C||0);const s=Object.entries({D,I,S,C}).sort((a,b)=>b[1]-a[1]);DB.staff.push({id:'p_'+Date.now()+'_'+added,name:x.name,mobile:x.mobile||'',empId:x.empId||'',role:x.role||'',showroom:x.showroom||'',D,I,S,C,primary:s[0][0],secondary:s[1][0],source:'upload',date:new Date().toISOString()});added++});
+        saveDB();toast(`${added} imported.`);switchTab('staff');
+      } else {
+        const lines=text.split(/\r?\n/).filter(l=>l.trim());const h=lines[0].split(',').map(x=>x.trim().toLowerCase());
+        const idx={name:h.indexOf('name'),mobile:h.indexOf('mobile'),empId:h.indexOf('empid'),role:h.indexOf('role'),showroom:h.indexOf('showroom'),D:h.indexOf('d'),I:h.indexOf('i'),S:h.indexOf('s'),C:h.indexOf('c')};
+        if(idx.name<0||idx.D<0){toast('Need: name, D, I, S, C');return}
+        let added=0;
+        for(let i=1;i<lines.length;i++){
+          const c=lines[i].split(',');const name=c[idx.name]?.trim();if(!name)continue;
+          const D=clamp(+c[idx.D]),I=clamp(+c[idx.I]),S=clamp(+c[idx.S]),C=clamp(+c[idx.C]);
+          const s=Object.entries({D,I,S,C}).sort((a,b)=>b[1]-a[1]);
+          DB.staff.push({id:'p_'+Date.now()+'_'+i,name,mobile:idx.mobile>=0?c[idx.mobile]?.trim():'',empId:idx.empId>=0?c[idx.empId]?.trim():'',role:idx.role>=0?c[idx.role]?.trim():'',showroom:idx.showroom>=0?c[idx.showroom]?.trim():'',D,I,S,C,primary:s[0][0],secondary:s[1][0],source:'upload',date:new Date().toISOString()});
+          added++;
+        }
+        saveDB();toast(`${added} imported.`);switchTab('staff');
+      }
+    }catch(e){toast('Parse error.')}
+  };r.readAsText(file);
+}
+function clamp(n){n=+n;if(isNaN(n))return 50;return Math.max(0,Math.min(100,n))}
+function addManualProfile(){
+  const name=document.getElementById('mProfName').value.trim();if(!name){toast('Name?');return}
+  const D=clamp(document.getElementById('mProfD').value||50),I=clamp(document.getElementById('mProfI').value||50),S=clamp(document.getElementById('mProfS').value||50),C=clamp(document.getElementById('mProfC').value||50);
+  const s=Object.entries({D,I,S,C}).sort((a,b)=>b[1]-a[1]);
+  const p={id:'p_'+Date.now(),name,mobile:document.getElementById('mProfMobile').value.trim(),role:document.getElementById('mProfRole').value.trim(),showroom:document.getElementById('mProfShow').value.trim(),D,I,S,C,primary:s[0][0],secondary:s[1][0],source:'upload',date:new Date().toISOString()};
+  DB.staff.push(p);saveDB();
+  ['mProfName','mProfMobile','mProfRole','mProfShow','mProfD','mProfI','mProfS','mProfC'].forEach(i=>document.getElementById(i).value='');
+  showProfileResult(p,false);
+}
+function handleJDFile(file){const r=new FileReader();r.onload=()=>{document.getElementById('jdDesc').value=r.result.slice(0,4000);toast('JD loaded.')};r.readAsText(file)}
+function saveJD(){
+  const title=document.getElementById('jdTitle').value.trim();if(!title){toast('Role title?');return}
+  const desc=document.getElementById('jdDesc').value.trim();const spec=document.getElementById('jdSpec').value.trim();
+  const combined=desc+' '+spec;const suggested=suggestDISCFromText(combined);
+  const jd={id:'jd_'+Date.now(),title,dept:document.getElementById('jdDept').value.trim(),reports:document.getElementById('jdReports').value.trim(),band:document.getElementById('jdBand').value.trim(),desc,spec,suggested,ideal:{...suggested},tolerance:15,keywords:extractKeywords(combined),date:new Date().toISOString()};
+  DB.jds.push(jd);saveDB();
+  ['jdTitle','jdDept','jdReports','jdBand','jdDesc','jdSpec'].forEach(i=>document.getElementById(i).value='');
+  toast('JD saved.');switchTab('jobanalysis');
+  document.getElementById('jdSelect').value=jd.id;loadJDForAnalysis();
+}
+const DISC_KW={D:['lead','drive','target','achieve','result','decision','decisive','initiate','manage','authority','negotiate','close','convert','challenge','compete','entrepreneur','own','accountable','deliver','strategic','fast-paced','urgency','assert'],I:['communicate','persuade','influence','engage','rapport','relationship','customer','client','present','pitch','team','collaborate','network','outgoing','enthusiastic','motivate','storytell','brand','experience','warm','friendly','social','counsel'],S:['support','consistent','reliable','patient','steady','calm','loyal','follow-through','dependable','help','serve','listen','harmony','cooperate','sustain','maintain','routine','stable','empathy','care','assist','long-term'],C:['accurate','precise','compliance','process','standard','quality','audit','detail','analyse','analytical','data','verify','document','hallmark','certification','BIS','GIA','protocol','policy','procedure','checklist','systematic','methodical','check','rule','regulation','inventory','reconcile','appraise']};
+function suggestDISCFromText(text){
+  if(!text) return{D:50,I:50,S:50,C:50};
+  const t=text.toLowerCase();const c={D:0,I:0,S:0,C:0};
+  for(const d of ['D','I','S','C']) for(const kw of DISC_KW[d]){const m=t.match(new RegExp('\\b'+kw,'g'));if(m)c[d]+=m.length}
+  const tot=c.D+c.I+c.S+c.C;if(!tot)return{D:50,I:50,S:50,C:50};
+  const s={};for(const d of ['D','I','S','C']) s[d]=Math.max(25,Math.min(90,Math.round(40+c[d]/tot*60)));
+  return s;
+}
+function extractKeywords(text){if(!text)return [];const t=text.toLowerCase();const f=[];for(const d of ['D','I','S','C']) for(const kw of DISC_KW[d]) if(new RegExp('\\b'+kw).test(t)) f.push({kw,dim:d});return f.slice(0,30)}
+ 
+/* ---------- Job Analysis ---------- */
+function refreshJDSelect(){
+  const s=document.getElementById('jdSelect');const cur=s.value;
+  s.innerHTML='<option value="">Select a role…</option>'+DB.jds.map(j=>`<option value="${j.id}">${escapeHtml(j.title)}${j.dept?' — '+escapeHtml(j.dept):''}</option>`).join('');
+  if(cur&&DB.jds.find(j=>j.id===cur))s.value=cur;
+}
+function loadJDForAnalysis(){
+  const id=document.getElementById('jdSelect').value;const jd=DB.jds.find(j=>j.id===id);
+  if(!jd){document.getElementById('jdDetails').style.display='';document.getElementById('jdAnalysisBody').style.display='none';return}
+  document.getElementById('jdDetails').style.display='none';document.getElementById('jdAnalysisBody').style.display='block';
+  document.getElementById('jdDispTitle').textContent=jd.title;
+  document.getElementById('jdDispMeta').textContent=[jd.dept,jd.band,jd.reports?'reports to '+jd.reports:''].filter(Boolean).join(' · ');
+  document.getElementById('jdKeywords').innerHTML=jd.keywords.length?jd.keywords.map(k=>`<span class="tag" style="background:var(--${k.dim==='D'?'dom':k.dim==='I'?'inf':k.dim==='S'?'ste':'con'});color:#fff">${escapeHtml(k.kw)} · ${k.dim}</span>`).join(' '):'<span class="subtle">No DISC keywords matched.</span>';
+  for(const d of ['D','I','S','C']){document.getElementById('ideal'+d).value=jd.ideal[d];document.getElementById('ideal'+d+'v').textContent=jd.ideal[d]}
+  document.getElementById('tolerance').value=jd.tolerance||15;
+  renderJobProfilePlot(jd);
+  renderCompetencies(jd);renderCriticalJobAnalysis(jd);
+}
+function renderJobProfilePlot(jd){
+  // Convert 0-100 norm to PPA-style tally (-12..+12 for Self-Image plot style)
+  const ideal=jd.ideal;
+  const tally={};
+  for(const d of ['D','I','S','C']) tally[d]=Math.round((ideal[d]-50)/4.2);
+  const svg=renderPpaGraph(null,tally,'Job Profile',12,true);
+  document.getElementById('jdPpaPlot').innerHTML=`<div class="job-profile-box" style="max-width:none"><h3 style="text-align:center">Job Profile</h3><div class="ppa-svg-box">${svg}</div></div>`;
+}
+function updateIdeal(){
+  for(const d of ['D','I','S','C']){const v=+document.getElementById('ideal'+d).value;document.getElementById('ideal'+d+'v').textContent=v}
+  const id=document.getElementById('jdSelect').value;const jd=DB.jds.find(j=>j.id===id);
+  if(jd){
+    jd.ideal={D:+document.getElementById('idealD').value,I:+document.getElementById('idealI').value,S:+document.getElementById('idealS').value,C:+document.getElementById('idealC').value};
+    jd.tolerance=+document.getElementById('tolerance').value;
+    renderJobProfilePlot(jd);renderCompetencies(jd);renderCriticalJobAnalysis(jd);
+  }
+}
+function resetIdealFromJD(){
+  const id=document.getElementById('jdSelect').value;const jd=DB.jds.find(j=>j.id===id);if(!jd)return;
+  jd.ideal={...jd.suggested};saveDB();loadJDForAnalysis();toast('Reset.');
+}
+function saveIdealProfile(){
+  const id=document.getElementById('jdSelect').value;const jd=DB.jds.find(j=>j.id===id);if(!jd){toast('Select JD.');return}
+  jd.ideal={D:+document.getElementById('idealD').value,I:+document.getElementById('idealI').value,S:+document.getElementById('idealS').value,C:+document.getElementById('idealC').value};
+  jd.tolerance=+document.getElementById('tolerance').value;
+  const jp=DB.jobProfiles.find(x=>x.jdId===jd.id);
+  if(jp){jp.ideal=jd.ideal;jp.tolerance=jd.tolerance;jp.title=jd.title}
+  else DB.jobProfiles.push({id:'jp_'+Date.now(),jdId:jd.id,title:jd.title,ideal:jd.ideal,tolerance:jd.tolerance});
+  saveDB();toast('Saved.');
+}
+function renderCompetencies(jd){
+  const i=jd.ideal;const sorted=Object.entries(i).sort((a,b)=>b[1]-a[1]);
+  const comp={D:{high:'Drives results; takes ownership; pushes past obstacles.',low:'Consultative; defers to consensus.'},I:{high:'Builds rapport; persuasive; energetic with customers.',low:'Measured; task-focused.'},S:{high:'Reliable; patient; consistent.',low:'Change-friendly; fast-moving.'},C:{high:'Attention to detail; process-strict; compliance-oriented.',low:'Flexible; less bound by protocols.'}};
+  const html=sorted.map(([d,v])=>{
+    const lvl=v>=65?'high':v<=35?'low':'mid';
+    if(lvl==='mid') return `<div style="padding:8px 0;border-bottom:1px dashed var(--rule)"><span class="disc-badge disc-${d}" style="transform:scale(.75);display:inline-block;vertical-align:middle;margin-right:6px">${d}</span> <strong>Balanced ${dimName(d)}</strong> (${v}/100)</div>`;
+    return `<div style="padding:8px 0;border-bottom:1px dashed var(--rule)"><span class="disc-badge disc-${d}" style="transform:scale(.75);display:inline-block;vertical-align:middle;margin-right:6px">${d}</span> <strong>${lvl==='high'?'High':'Low'} ${dimName(d)}</strong> (${v}/100) — ${comp[d][lvl]}</div>`;
+  }).join('');
+  document.getElementById('jdCompetencies').innerHTML=html;
+}
+function dimName(d){return{D:'Dominance',I:'Influence',S:'Steadiness',C:'Conscientiousness'}[d]}
+function renderCriticalJobAnalysis(jd){
+  const i=jd.ideal;const ins=[];
+  if(i.D>=65&&i.C>=65) ins.push({type:'warn',text:'High D + High C — demanding combo. Candidates may be rare.'});
+  if(i.D>=65&&i.S<=35) ins.push({type:'info',text:'High D + Low S — fast pace. Burnout risk.'});
+  if(i.I>=65&&i.C<=35) ins.push({type:'info',text:'High I + Low C — persuasion over process.'});
+  if(i.S>=65&&i.D<=35) ins.push({type:'info',text:'High S + Low D — stability-focused.'});
+  if(i.C>=70) ins.push({type:'info',text:'Very high C — include skills test in selection.'});
+  if(i.I>=70) ins.push({type:'info',text:'Very high I — include live role-play in selection.'});
+  if(Math.max(i.D,i.I,i.S,i.C)-Math.min(i.D,i.I,i.S,i.C)<20) ins.push({type:'warn',text:'Flat profile — sharpen 1-2 driving dimensions.'});
+  const txt=(jd.desc+' '+jd.spec).toLowerCase();
+  if(/customer/.test(txt)&&i.I<55) ins.push({type:'warn',text:'JD mentions customer-facing work but I is modest.'});
+  if(/(hallmark|bis|gia|audit|compliance|cert)/.test(txt)&&i.C<55) ins.push({type:'warn',text:'JD mentions compliance but C is modest.'});
+  if(/(target|revenue|conversion|closing)/.test(txt)&&i.D<55) ins.push({type:'warn',text:'JD mentions targets but D is modest.'});
+  if(!ins.length) ins.push({type:'good',text:'Profile is internally consistent.'});
+  document.getElementById('jdCriticalAnalysis').innerHTML=ins.map(x=>`<div class="insight-item"><span class="insight-icon" style="background:${x.type==='warn'?'var(--gold-deep)':x.type==='good'?'var(--ste)':'var(--con)'}">${x.type==='warn'?'!':x.type==='good'?'✓':'i'}</span><div>${x.text}</div></div>`).join('');
+}
+ 
+/* ---------- Compare ---------- */
+function refreshCompareSelects(){
+  document.getElementById('cmpStaff').innerHTML='<option value="">Choose…</option>'+DB.staff.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}${p.role?' — '+escapeHtml(p.role):''}</option>`).join('');
+  document.getElementById('cmpJob').innerHTML='<option value="">Choose…</option>'+DB.jds.map(j=>`<option value="${j.id}">${escapeHtml(j.title)}</option>`).join('');
+}
+function runComparison(){
+  const sid=document.getElementById('cmpStaff').value,jid=document.getElementById('cmpJob').value;
+  if(!sid||!jid){document.getElementById('cmpBody').style.display='none';return}
+  const p=DB.staff.find(x=>x.id===sid),jd=DB.jds.find(x=>x.id===jid);if(!p||!jd)return;
+  document.getElementById('cmpBody').style.display='block';
+  const ideal=jd.ideal,tol=jd.tolerance||15;
+  let totalFit=0;const gaps={};
+  ['D','I','S','C'].forEach(d=>{const g=p[d]-ideal[d];gaps[d]=g;const a=Math.abs(g);let s;if(a<=tol)s=100-(a/tol)*20;else s=Math.max(0,80-(a-tol)*1.5);totalFit+=s});
+  const fit=Math.round(totalFit/4);
+  const fs=document.getElementById('fitScore');fs.textContent=fit+'%';fs.style.color=fit>=80?'var(--ste)':fit>=60?'var(--gold-deep)':'var(--dom)';
+  document.getElementById('fitVerdict').textContent=fit>=85?`Strong fit — ${p.name} matches ${jd.title}.`:fit>=70?'Good fit with minor development areas.':fit>=55?'Partial fit — targeted coaching needed.':'Weak fit — significant gap.';
+  document.getElementById('fitBar').style.width=fit+'%';
+  document.getElementById('gapRows').innerHTML=['D','I','S','C'].map(d=>{
+    const g=gaps[d],a=Math.abs(g);const cls=a<=tol?'gap-good':a<=tol*1.7?'gap-warn':'gap-bad';const sign=g>0?'+':'';
+    const col=cls==='gap-good'?'var(--ste)':cls==='gap-warn'?'var(--gold-deep)':'var(--dom)';
+    return `<div style="display:grid;grid-template-columns:40px 1fr 80px 80px 80px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--rule);font-size:13px"><span class="disc-badge disc-${d}" style="transform:scale(.7)">${d}</span><div>${dimName(d)}</div><div style="text-align:center">${ideal[d]}</div><div style="text-align:center">${p[d]}</div><div style="text-align:center;color:${col};font-weight:600">${sign}${g}</div></div>`;
+  }).join('');
+  // PPA plots — staff 3 graphs + job profile
+  const ppa=p.ppa||derivePpaFromScores(p.D,p.I,p.S,p.C);
+  const jobTally={};for(const d of ['D','I','S','C']) jobTally[d]=Math.round((ideal[d]-50)/4.2);
+  document.getElementById('cmpPpaPlot').innerHTML=renderThreeGraphs(ppa)+
+    `<h4 style="margin-top:14px">Job Profile (${escapeHtml(jd.title)})</h4>`+renderSinglePpaGraph(jobTally,true,12);
+  renderCriticalInsights(p,jd,gaps,fit);renderDevPlan(p,jd,gaps);
+}
+function renderCriticalInsights(p,jd,gaps,fit){
+  const ins=[];const ideal=jd.ideal;const tol=jd.tolerance||15;
+  Object.entries(gaps).forEach(([d,g])=>{
+    if(Math.abs(g)<=tol)return;
+    if(g>tol) ins.push({type:g>tol*2?'warn':'info',text:`${d} is ${g} pts ABOVE ideal. ${overText(d)}`});
+    else ins.push({type:g<-tol*2?'warn':'info',text:`${d} is ${Math.abs(g)} pts BELOW ideal. ${underText(d)}`});
+  });
+  if(p.primary!==Object.entries(ideal).sort((a,b)=>b[1]-a[1])[0][0]) ins.push({type:'warn',text:`Style mismatch — primary is ${p.primary}, role primary is ${Object.entries(ideal).sort((a,b)=>b[1]-a[1])[0][0]}.`});
+  Object.entries(gaps).forEach(([d,g])=>{if(p[d]>=65&&Math.abs(g)<=tol) ins.push({type:'good',text:`Strong ${dimName(d)} (${p[d]}) — leverage as signature strength.`})});
+  if(fit>=85&&!ins.filter(i=>i.type==='warn').length) ins.push({type:'good',text:`Clean match — focus on skill/product mastery.`});
+  document.getElementById('criticalInsights').innerHTML=ins.map(x=>`<div class="insight-item"><span class="insight-icon" style="background:${x.type==='warn'?'var(--dom)':x.type==='good'?'var(--ste)':'var(--con)'}">${x.type==='warn'?'!':x.type==='good'?'✓':'i'}</span><div>${x.text}</div></div>`).join('');
+}
+function overText(d){return{D:'May be too forceful. Channel into stretch goals.',I:'May skim detail. Pair with high-C.',S:'May resist change.',C:'May over-analyse. Time-box.'}[d]}
+function underText(d){return{D:'May defer decisions. Coach assertiveness.',I:'Weak rapport — role-play drills.',S:'Restless — shorter cycles.',C:'Loose on process — checklists, audits.'}[d]}
+function renderDevPlan(p,jd,gaps){
+  const a=[];const tol=jd.tolerance||15;
+  Object.entries(gaps).forEach(([d,g])=>{
+    if(Math.abs(g)<=tol)return;
+    if(d==='D'&&g<0)a.push('• <strong>Build Dominance:</strong> Assertiveness workshop; target-ownership reviews.');
+    if(d==='D'&&g>0)a.push('• <strong>Temper Dominance:</strong> Empathic-listening practice; 360 feedback.');
+    if(d==='I'&&g<0)a.push('• <strong>Build Influence:</strong> Golden Hour role-play; storytelling drills.');
+    if(d==='I'&&g>0)a.push('• <strong>Temper Influence:</strong> Detail huddles; commitment-tracking.');
+    if(d==='S'&&g<0)a.push('• <strong>Build Steadiness:</strong> Consistency scorecards; reflection time.');
+    if(d==='S'&&g>0)a.push('• <strong>Temper Steadiness:</strong> Change-exposure; decision drills.');
+    if(d==='C'&&g<0)a.push('• <strong>Build Conscientiousness:</strong> Hallmark refresher; daily checklists.');
+    if(d==='C'&&g>0)a.push('• <strong>Temper Conscientiousness:</strong> Time-boxed decisions; "80% is done".');
+  });
+  if(!a.length) a.push('• No critical behavioural gaps — focus on product mastery.');
+  document.getElementById('devPlan').innerHTML=a.join('<br>');
+}
+function printComparison(){window.print()}
+ 
+/* ---------- Dashboard ---------- */
+function renderDashboard(){
+  if(session.role!=='admin')return;
+  const staff=DB.staff;const c={D:0,I:0,S:0,C:0};staff.forEach(p=>{c[p.primary]=(c[p.primary]||0)+1});
+  document.getElementById('dashStats').innerHTML=`
+    <div class="card tight" style="margin:0"><div class="subtle">Total profiles</div><div style="font-family:Fraunces,serif;font-size:2rem">${staff.length}</div></div>
+    <div class="card tight" style="margin:0"><div class="subtle">Roles captured</div><div style="font-family:Fraunces,serif;font-size:2rem">${DB.jds.length}</div></div>
+    <div class="card tight" style="margin:0"><div class="subtle">Registered</div><div style="font-family:Fraunces,serif;font-size:2rem">${DB.registry.length}</div></div>
+    <div class="card tight" style="margin:0"><div class="subtle">Completion rate</div><div style="font-family:Fraunces,serif;font-size:2rem">${DB.registry.length?Math.round(DB.registry.filter(r=>r.status==='done').length/DB.registry.length*100):0}%</div></div>`;
+  drawDashChart(c);
+  const recent=staff.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  document.getElementById('recentProfiles').innerHTML=recent.length?`<div class="table-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Primary</th><th>Date</th></tr></thead><tbody>${recent.map(p=>`<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.role||'—')}</td><td><span class="disc-badge disc-${p.primary}">${p.primary}</span></td><td class="subtle">${new Date(p.date).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty-state">No profiles yet.</div>';
+  const pending=DB.registry.filter(r=>computeStatus(r)==='pending').slice(0,6);
+  document.getElementById('pendingPanel').innerHTML=pending.length?`<div class="table-wrap"><table><thead><tr><th>Name</th><th>Mobile</th><th>OTP</th><th>Action</th></tr></thead><tbody>${pending.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>+91 ${r.mobile}</td><td><code>${r.otp}</code></td><td><button class="btn sm" onclick="viewOtp('${r.id}')">Re-share</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty-state" style="padding:20px">No pending OTPs.</div>';
+}
+function drawDashChart(c){
+  const ctx=document.getElementById('dashChart');if(!ctx)return;
+  if(ctx._chart)ctx._chart.destroy();
+  ctx._chart=new Chart(ctx,{type:'bar',data:{labels:['Dominance','Influence','Steadiness','Conscientiousness'],datasets:[{data:[c.D||0,c.I||0,c.S||0,c.C||0],backgroundColor:['#c0392b','#e0a528','#2f7a4d','#2a5a8f'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+}
+ 
+/* ---------- Settings ---------- */
+function loadSettingsInto(){
+  document.getElementById('setOrg').value=DB.settings.org||'';
+  document.getElementById('setSender').value=DB.settings.sender||'';
+  document.getElementById('setExpiry').value=DB.settings.expiryHours||24;
+}
+function saveSettings(){
+  DB.settings.org=document.getElementById('setOrg').value.trim()||'L&D';
+  DB.settings.sender=document.getElementById('setSender').value.trim()||'L&D Team';
+  DB.settings.expiryHours=Math.max(1,Math.min(168,+document.getElementById('setExpiry').value||24));
+  saveDB();toast('Saved.');
+}
+function changePassword(){
+  const cur=document.getElementById('curPw').value,nw=document.getElementById('newPw').value,cf=document.getElementById('confPw').value;
+  if(hashPw(cur)!==DB.settings.adminHash){toast('Current password wrong.');return}
+  if(nw.length<6){toast('New password min 6 chars.');return}
+  if(nw!==cf){toast('Confirmation mismatch.');return}
+  DB.settings.adminHash=hashPw(nw);saveDB();
+  ['curPw','newPw','confPw'].forEach(i=>document.getElementById(i).value='');
+  toast('Password changed.');
+}
+ 
+/* ---------- Import/Export/Reset ---------- */
+function exportAll(){const b=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='disc_profiler_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Exported.')}
+function importAll(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.staff||!d.jds)throw 0;if(!confirm('Replace ALL current data?'))return;DB=d;if(!DB.registry)DB.registry=[];if(!DB.settings)DB.settings=freshDB().settings;saveDB();toast('Imported.');switchTab('dashboard')}catch(er){toast('Invalid file.')}};r.readAsText(f);e.target.value=''}
+function resetAll(){if(!confirm('Delete ALL staff, profiles, JDs, registry?'))return;if(!confirm('Really sure?'))return;const h=DB.settings.adminHash;DB=freshDB();DB.settings.adminHash=h;saveDB();ensureSeed();toast('Cleared.');switchTab('dashboard')}
+ 
+/* ---------- Utils ---------- */
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ 
+/* ---------- Drops ---------- */
+function wireDrop(did,iid,handler){
+  const el=document.getElementById(did);if(!el)return;
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('dragover')});
+  el.addEventListener('dragleave',()=>el.classList.remove('dragover'));
+  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('dragover');const f=e.dataTransfer.files[0];if(f)handler(f)});
+  document.getElementById(iid).addEventListener('change',e=>{if(e.target.files[0])handler(e.target.files[0]);e.target.value=''});
+}
+wireDrop('profileDrop','profileFileInput',handleProfileFile);
+wireDrop('jdDrop','jdFileInput',handleJDFile);
+['staffMobile','staffOtp'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')staffLogin()}));
+document.getElementById('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')adminLogin()});
+ 
+/* ---------- Lang pills ---------- */
+function buildLangPills(){
+  const c=document.getElementById('langPills');
+  c.innerHTML=LANGS.map(l=>`<button class="lang-pill ${l.code==='en'?'active':''}" data-lang="${l.code}" onclick="setLang('${l.code}')">${l.name}</button>`).join('');
+}
+buildLangPills();
+ 
+/* ---------- Boot ---------- */
+showLogin();
+</script>
+</body>
+</html>
+ 
