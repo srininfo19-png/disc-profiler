@@ -902,6 +902,15 @@ try {
   }
 } catch(e) { console.error("Firebase init error", e); }
  
+function ensureDefaults(d) {
+  if(!d.registry) d.registry=[];
+  if(!d.staff) d.staff=[];
+  if(!d.jds) d.jds=[];
+  if(!d.jobProfiles) d.jobProfiles=[];
+  if(!d.settings) d.settings=freshDB().settings;
+  return d;
+}
+
 async function loadDB(){
   if (database) {
     try {
@@ -910,15 +919,12 @@ async function loadDB(){
       const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
       
       if (snapshot.exists()) {
-        const d = snapshot.val();
-        if(!d.registry)d.registry=[];
-        if(!d.settings)d.settings=freshDB().settings;
-        return d;
+        return ensureDefaults(snapshot.val());
       }
     } catch(e) { console.warn("Firebase load failed or timed out. Falling back to local storage."); }
   }
 
-  try{const raw=localStorage.getItem(STORE_KEY);if(raw){const d=JSON.parse(raw);if(!d.registry)d.registry=[];if(!d.settings)d.settings=freshDB().settings;return d;}}catch(e){}
+  try{const raw=localStorage.getItem(STORE_KEY);if(raw){return ensureDefaults(JSON.parse(raw));}}catch(e){}
   return freshDB();
 }
 function saveDB(){
@@ -974,6 +980,7 @@ function removeSeed(){
  
 /* ---------- Session & routing ---------- */
 let session={role:null};
+try{const s=sessionStorage.getItem('disc_session');if(s)session=JSON.parse(s);}catch(e){}
 let activeAssess=null;
 let responses={};
 let assessLang='en';
@@ -1002,6 +1009,7 @@ async function staffLogin(){
   if(String(rec.otp).trim()!==otp){toast('Incorrect OTP. Check the code shared by L&D.');return}
   if(Date.now()>rec.otpExpiry){rec.status='expired';saveDB();toast('OTP expired. Ask L&D for a new one.');return}
   session={role:'staff',mobile:rec.mobile,name:rec.name,recId:rec.id};
+  sessionStorage.setItem('disc_session',JSON.stringify(session));
   assessLang=currentLang;
   activeAssess={recId:rec.id,adhoc:null};
   showApp(); configureForRole(); switchTab('assess');
@@ -1012,11 +1020,12 @@ async function adminLogin(){
   const pw=document.getElementById('adminPass').value;
   if(hashPw(pw)!==DB.settings.adminHash){toast('Incorrect password.');return}
   session={role:'admin',name:'Admin'};
+  sessionStorage.setItem('disc_session',JSON.stringify(session));
   activeAssess=null;
   showApp(); configureForRole(); switchTab('dashboard');
 }
 function logout(){
-  session={role:null}; activeAssess=null; responses={};
+  session={role:null}; sessionStorage.removeItem('disc_session'); activeAssess=null; responses={};
   ['staffMobile','staffOtp','adminPass'].forEach(i=>document.getElementById(i).value='');
   showLogin();
 }
@@ -1754,7 +1763,8 @@ buildLangPills();
 async function bootApp() {
   DB = await loadDB();
   ensureSeed();
-  showLogin();
+  if(session.role){showApp(); configureForRole(); switchTab(session.role==='admin'?'dashboard':'assess');}
+  else{showLogin();}
 }
 bootApp();
 </script>
