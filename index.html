@@ -905,14 +905,17 @@ try {
 async function loadDB(){
   if (database) {
     try {
-      const snapshot = await database.ref(STORE_KEY).once('value');
+      const fetchPromise = database.ref(STORE_KEY).once('value');
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Firebase timeout')), 2500));
+      const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
+      
       if (snapshot.exists()) {
         const d = snapshot.val();
         if(!d.registry)d.registry=[];
         if(!d.settings)d.settings=freshDB().settings;
         return d;
       }
-    } catch(e) { console.error(e); }
+    } catch(e) { console.warn("Firebase load failed or timed out. Falling back to local storage."); }
   }
 
   try{const raw=localStorage.getItem(STORE_KEY);if(raw){const d=JSON.parse(raw);if(!d.registry)d.registry=[];if(!d.settings)d.settings=freshDB().settings;return d;}}catch(e){}
