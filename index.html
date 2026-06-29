@@ -914,14 +914,13 @@ function ensureDefaults(d) {
 async function loadDB(){
   if (database) {
     try {
-      const fetchPromise = database.ref(STORE_KEY).once('value');
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Firebase timeout')), 2500));
-      const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
-      
+      const snapshot = await database.ref(STORE_KEY).once('value');
       if (snapshot.exists()) {
-        return ensureDefaults(snapshot.val());
+        const data = ensureDefaults(snapshot.val());
+        try{localStorage.setItem(STORE_KEY,JSON.stringify(data))}catch(e){}
+        return data;
       }
-    } catch(e) { console.warn("Firebase load failed or timed out. Falling back to local storage."); }
+    } catch(e) { console.warn("Firebase load failed. Falling back to local storage.", e); }
   }
 
   try{const raw=localStorage.getItem(STORE_KEY);if(raw){return ensureDefaults(JSON.parse(raw));}}catch(e){}
@@ -932,6 +931,25 @@ function saveDB(){
     database.ref(STORE_KEY).set(DB).catch(e => toast('Firebase sync error.'));
   }
   try{localStorage.setItem(STORE_KEY,JSON.stringify(DB))}catch(e){toast('Storage error.')}
+}
+
+function attachRealtimeSync() {
+  if (database && !window.dbSyncAttached) {
+    window.dbSyncAttached = true;
+    database.ref(STORE_KEY).on('value', (snapshot) => {
+      if (snapshot.exists()) {
+        DB = ensureDefaults(snapshot.val());
+        try{localStorage.setItem(STORE_KEY,JSON.stringify(DB))}catch(e){}
+        if (session && session.role) {
+          if(document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
+          if(document.getElementById('panel-registry').classList.contains('active')) { renderRegistry(); renderRegStats(); }
+          if(document.getElementById('panel-staff').classList.contains('active')) renderStaffList();
+          if(document.getElementById('panel-jobanalysis').classList.contains('active')) refreshJDSelect();
+          if(document.getElementById('panel-compare').classList.contains('active')) refreshCompareSelects();
+        }
+      }
+    });
+  }
 }
 function hashPw(s){let h=5381;for(let i=0;i<s.length;i++){h=((h<<5)+h)+s.charCodeAt(i);h|=0}return 'h_'+(h>>>0).toString(16)}
  
@@ -1762,6 +1780,7 @@ buildLangPills();
 /* ---------- Boot ---------- */
 async function bootApp() {
   DB = await loadDB();
+  attachRealtimeSync();
   ensureSeed();
   if(session.role){showApp(); configureForRole(); switchTab(session.role==='admin'?'dashboard':'assess');}
   else{showLogin();}
